@@ -1,0 +1,1844 @@
+<title>Property Roadmap Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;500;700&family=Public+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --bg:#F5F6F8; --surface:#FFFFFF; --surface-2:#EBEDF1; --ink:#15181D; --muted:#5F6772; --line:#D8DCE3;
+  --accent:#1B4FA0; --accent-soft:#E4EAF7; --accent-ink:#FFFFFF; --gold:#8A6516; --gold-soft:#F6EED9;
+  --pos:#12714A; --pos-bg:#E1F0E9; --neg:#A93226; --neg-bg:#F7E5E2; --warn:#8A5A00; --warn-bg:#FBF0D9;
+  --band:#E2E6EC; --band-ink:#2A3340; --varband:#F7EFDD;
+  --shadow:0 1px 2px rgba(20,26,36,.06),0 8px 24px rgba(20,26,36,.07);
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"Public Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --r-lg:16px; --r-md:12px; --r-sm:10px;
+  --ease:cubic-bezier(.16,1,.3,1);
+  color-scheme:light dark;   /* form controls, scrollbars and carets follow the theme */
+}
+:root[data-theme="light"]{color-scheme:light}
+:root[data-theme="dark"]{color-scheme:dark}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#101318; --surface:#171B21; --surface-2:#212630; --ink:#E9ECF1; --muted:#98A1AE; --line:#2C333D;
+    --accent:#7FA9F0; --accent-soft:#16233A; --accent-ink:#0D1219; --gold:#D8B066; --gold-soft:#332A17;
+    --pos:#5CC48D; --pos-bg:#12301F; --neg:#F08A80; --neg-bg:#3A1C1A; --warn:#E8B85A; --warn-bg:#33270F;
+    --band:#222B37; --band-ink:#C6D2E6; --varband:#2E2716;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#101318; --surface:#171B21; --surface-2:#212630; --ink:#E9ECF1; --muted:#98A1AE; --line:#2C333D;
+  --accent:#7FA9F0; --accent-soft:#16233A; --accent-ink:#0D1219; --gold:#D8B066; --gold-soft:#332A17;
+  --pos:#5CC48D; --pos-bg:#12301F; --neg:#F08A80; --neg-bg:#3A1C1A; --warn:#E8B85A; --warn-bg:#33270F;
+  --band:#222B37; --band-ink:#C6D2E6; --varband:#2E2716;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.top,.layout>.panel,main>*{animation:rise .5s var(--ease) both}
+.top{animation-delay:.02s} .layout>.panel{animation-delay:.08s} main>*{animation-delay:.12s}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5}
+.wrap{max-width:1320px;margin:0 auto;padding-inline:16px;padding-block:24px 48px}
+@media (min-width:720px){.wrap{padding-inline:28px}}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;letter-spacing:-.01em}
+.num{font-variant-numeric:tabular-nums}
+/* Dense figures in mono so columns line up and digits are unmistakable */
+table td,.kv .v,.meterlab,.chip i{font-family:var(--mono);font-variant-numeric:tabular-nums}
+table td .sub,.kv .v small,table td:first-child,table td.l,.sheet td:not(:last-child),.lib td{font-family:var(--body)}
+.kv .v{font-size:14px;letter-spacing:-.01em}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+
+.top{display:grid;gap:20px;margin-bottom:24px}
+@media (min-width:960px){.top{grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);align-items:end}}
+.top h1{font-size:clamp(30px,4.4vw,46px);font-weight:800;line-height:1.02;margin-top:6px}
+.top h1 em{font-style:normal;color:var(--accent)}
+.top p{color:var(--muted);max-width:52ch;margin:10px 0 0}
+.stages{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.stage{padding:10px 10px 12px;border-top:3px solid var(--line);color:var(--muted);min-width:0}
+.stage b{display:block;font-family:var(--display);font-size:13px;color:var(--ink);font-weight:700}
+.stage span{display:block;font-size:12px;line-height:1.35}
+.stage .age{font-size:11px;font-weight:700;letter-spacing:.06em}
+.stage.on{border-top-color:var(--accent);background:var(--surface);border-radius:0 0 8px 8px}
+.stage.on .age{color:var(--accent)}
+@media (max-width:560px){.stage span:not(.age){display:none}}
+
+.layout{display:grid;gap:20px;align-items:start}
+@media (min-width:1000px){.layout{grid-template-columns:360px minmax(0,1fr)}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:4px 18px 18px;box-shadow:var(--shadow)}
+@media (min-width:1000px){.panel{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px);max-height:calc(100vh - 32px);overflow:auto}}
+.fs{border:0;padding:16px 0 4px;margin:0;border-bottom:1px solid var(--line)}
+.fs:last-child{border-bottom:0}
+.fs legend{padding:0;margin-bottom:10px;font-family:var(--display);font-weight:700;font-size:16px;float:left;width:100%}
+.fs legend+*{clear:both}
+.field{display:grid;gap:5px;margin-bottom:12px}
+.field label,.flabel{font-size:12.5px;font-weight:600;color:var(--muted)}
+.hint{font-size:12px;color:var(--muted);margin:-6px 0 12px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+input[type=number],input[type=text],select{width:100%;font:inherit;font-size:15px;color:var(--ink);background:var(--surface-2);border:1px solid transparent;border-radius:var(--r-sm);padding:9px 11px;font-variant-numeric:tabular-nums;transition:background .15s var(--ease),border-color .15s var(--ease)}
+input[type=number]:hover,input[type=text]:hover,select:hover{border-color:var(--line)}
+input[type=number],input[type=text]{font-family:var(--mono)}
+input:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visible,.seg input:focus-visible+label{outline:2px solid var(--accent);outline-offset:2px}
+.money{position:relative}
+.money::before{content:"RM";position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:12px;font-weight:700;color:var(--muted);pointer-events:none}
+.money input{padding-left:38px}
+.seg{display:flex;background:var(--surface-2);border-radius:var(--r-sm);padding:3px;gap:3px}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label{flex:1;text-align:center;padding:8px 6px;border-radius:8px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;line-height:1.2}
+.seg label{transition:background .15s var(--ease),color .15s var(--ease)}
+.seg label:active{transform:scale(.98)}
+.seg input:checked+label{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.agebox{display:flex;align-items:center;gap:12px}
+.agebox input[type=range]{flex:1;accent-color:var(--accent)}
+.agebox output{font-family:var(--display);font-size:28px;font-weight:800;min-width:2ch;text-align:right}
+details.more{margin-top:4px}
+details.more summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--accent);padding:6px 0 10px;list-style:none}
+details.more summary::-webkit-details-marker{display:none}
+details.more summary::before{content:"+ "}
+details.more[open] summary::before{content:"− "}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:14px;font-weight:600;margin-bottom:12px;cursor:pointer}
+.check input{width:18px;height:18px;margin-top:2px;accent-color:var(--accent);flex:none}
+.check small{display:block;font-weight:400;color:var(--muted);font-size:12.5px}
+
+main{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;min-width:0}
+.props>*,.pickers>*,.bdgrid>*,.prophead .who{min-width:0}
+.pickers select{max-width:100%;min-width:0}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow)}
+.fact{background:var(--surface);padding:12px 14px}
+.fact .v{font-family:var(--display);font-size:20px;font-weight:700;margin-top:2px}
+.fact .s{font-size:12px;color:var(--muted)}
+.banner{border-radius:var(--r-md);padding:12px 14px;font-size:14px;display:flex;gap:10px;align-items:flex-start}
+.banner.ok{background:var(--pos-bg);color:var(--pos)}
+.banner.warn{background:var(--warn-bg);color:var(--warn)}
+.banner.bad{background:var(--neg-bg);color:var(--neg)}
+.banner b{color:inherit}
+.banner p{margin:0;color:var(--ink)}
+
+.sectionhead{display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap}
+.sectionhead h2{font-size:22px;font-weight:700}
+.sectionhead p{margin:2px 0 0;color:var(--muted);font-size:13.5px}
+
+.plans{display:grid;gap:14px}
+@media (min-width:760px){.plans{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.plan{position:relative;text-align:left;font:inherit;color:inherit;background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r-lg);padding:16px;cursor:pointer;display:flex;flex-direction:column;gap:12px;transition:border-color .18s var(--ease),transform .18s var(--ease),box-shadow .18s var(--ease)}
+.plan:hover{border-color:var(--muted);transform:translateY(-2px);box-shadow:var(--shadow)}
+.plan:active{transform:scale(.99)}
+.plan[aria-pressed="true"]{border-color:var(--accent);box-shadow:var(--shadow)}
+.plan .ptitle{display:flex;justify-content:space-between;gap:8px;align-items:start}
+.plan h3{font-size:17px;font-weight:700}
+.plan .tag{font-size:12.5px;color:var(--muted);margin-top:2px}
+.pill{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:99px;white-space:nowrap;vertical-align:middle}
+.pill.rec{background:var(--accent);color:var(--accent-ink)}
+.pill.miss{background:var(--warn-bg);color:var(--warn)}
+.pill.uc{background:var(--gold-soft);color:var(--gold)}
+.pill.done{background:var(--surface-2);color:var(--muted)}
+.pill.src{background:var(--band);color:var(--band-ink)}
+.pill.stg{background:var(--accent);color:var(--accent-ink)}
+.pill.old{background:var(--warn-bg);color:var(--warn)}
+.pill.cut{background:var(--warn-bg);color:var(--warn);text-transform:none;letter-spacing:0;font-size:11px}
+table.wide tr.prow{cursor:pointer}
+table.wide tr.prow{transition:background .15s var(--ease)}
+table.wide tr.prow:hover td{background:var(--surface-2)}
+table.wide tr.prow.on td{background:var(--band);color:var(--band-ink)}
+table.wide tr.prow.on td .sub,table.wide tr.prow.on td b{color:inherit}
+table.wide tr.prow:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.exec{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;margin-top:6px}
+.exec>div{background:var(--surface);padding:12px 14px}
+.exec b{display:block;font-family:var(--display);font-size:22px;font-weight:800;margin-top:2px}
+.exec span:last-child{font-size:12px;color:var(--muted)}
+.chip.add{font:inherit;font-size:12.5px;font-weight:600;border:1px dashed var(--line);background:var(--surface);color:var(--accent);cursor:pointer}
+.chip.add:hover{background:var(--accent-soft)}
+.chip.add:active{transform:translateY(1px)}
+.tgrid{display:grid;gap:14px;margin-top:14px}
+@media (min-width:760px){.tgrid{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}}
+.tblock{display:grid;gap:6px;align-content:start;padding:16px;border-radius:var(--r-md);background:var(--surface-2)}
+.tnum{font-family:var(--display);font-size:30px;font-weight:800;line-height:1}
+.tunit{background:var(--surface);border-radius:var(--r-sm);padding:10px 12px;margin-top:4px}
+.tline{margin:6px 0 0;font-size:14px}
+.rstages{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:12px}
+.rstage{display:grid;gap:8px;align-content:start;padding:14px;border-radius:var(--r-md);background:var(--surface-2)}
+.rstage.skip{opacity:.6}
+.rstage p{margin:0}
+@media (max-width:760px){.rstages{grid-template-columns:1fr}}
+.big{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.big .lab{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.big .val{font-family:var(--display);font-size:22px;font-weight:800;line-height:1.1}
+.pos{color:var(--pos)} .neg{color:var(--neg)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:12.5px;background:var(--surface-2);border-radius:var(--r-sm);padding:5px 9px;font-weight:600}
+.chip i{font-style:normal;color:var(--muted);font-weight:500}
+.meter{height:6px;border-radius:9px;background:var(--surface-2);overflow:hidden}
+.meter span{display:block;height:100%;background:var(--gold);border-radius:9px}
+.meterlab{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:4px}
+.small{font-size:12.5px;color:var(--muted)}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:18px;box-shadow:var(--shadow)}
+.tablewrap{overflow-x:auto;margin:14px -18px 0;padding:0 18px}
+table{width:100%;border-collapse:collapse;font-size:13.5px;font-variant-numeric:tabular-nums}
+.wide{min-width:900px}
+th{position:sticky;top:0;z-index:1;background:var(--surface);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:right;padding:9px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child,th.l,td.l{text-align:left}
+td .sub{display:block;font-size:12px;color:var(--muted);white-space:normal}
+.step{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:12.5px;flex:none}
+.fin{font-size:12px;font-weight:700;padding:3px 7px;border-radius:6px;background:var(--surface-2);white-space:nowrap}
+.fin.lppsa{background:var(--gold-soft);color:var(--gold)}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{font:inherit;font-size:13.5px;font-weight:600;border-radius:var(--r-sm);padding:8px 14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;transition:transform .12s var(--ease),background .15s var(--ease),border-color .15s var(--ease)}
+.btn:hover{background:var(--surface-2);border-color:var(--muted)}
+.btn:active{transform:translateY(1px)}
+.btn.primary:hover{background:var(--accent);filter:brightness(1.07)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.small{padding:5px 10px;font-size:12.5px}
+.notes{margin:14px 0 0;padding-left:18px;color:var(--muted);font-size:13px;display:grid;gap:4px}
+
+/* ---- Client one-pager: a page the client keeps, on screen and on paper ---- */
+#onePager{position:fixed;inset:0;z-index:100;background:var(--bg);overflow:auto;overscroll-behavior:contain}
+#onePager[hidden]{display:none}
+.op-bar{position:sticky;top:0;z-index:2;display:flex;justify-content:space-between;align-items:center;gap:12px;
+  padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--line);font-weight:600;font-size:13.5px}
+.op-page{max-width:820px;margin:0 auto;padding:28px 20px 56px;animation:rise .4s var(--ease) both}
+.op-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;
+  padding-bottom:12px;border-bottom:2px solid var(--ink)}
+.op-head b{font-family:var(--display);font-size:17px;letter-spacing:-.01em}
+.op-head span{display:block;color:var(--muted);font-size:13px}
+.op-date{color:var(--muted);font-size:12.5px;font-family:var(--mono)}
+.op-page h1{font-family:var(--display);font-size:clamp(25px,3.6vw,34px);font-weight:800;line-height:1.1;margin:22px 0 0;max-width:20ch}
+.op-lead{margin:10px 0 0;color:var(--muted);max-width:62ch}
+.op-page h2{font-family:var(--display);font-size:18px;font-weight:700;margin:30px 0 0}
+.op-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);
+  border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;margin-top:18px}
+.op-tile{background:var(--surface);padding:12px 14px}
+.op-tile b{display:block;font-family:var(--display);font-size:21px;font-weight:800;margin-top:2px}
+.op-lab{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.op-sub{display:block;font-size:12px;color:var(--muted)}
+.op-props{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:10px}
+.op-props>li{border:1px solid var(--line);border-radius:var(--r-md);padding:14px;background:var(--surface)}
+.op-prop-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.op-prop-head>div{flex:1;min-width:180px}
+.op-prop-head b{font-size:16px;font-weight:700}
+.op-step{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--accent);
+  color:var(--accent-ink);font-weight:700;font-size:13px;flex:none}
+.op-fin{font-size:12px;font-weight:700;background:var(--surface-2);border-radius:var(--r-sm);padding:4px 8px;white-space:nowrap}
+.op-facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:9px 14px;margin:12px 0 0}
+.op-facts dt{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.op-facts dd{margin:1px 0 0;font-family:var(--mono);font-weight:700;font-size:13.5px;font-variant-numeric:tabular-nums}
+.op-note{margin:10px 0 0;font-size:12.5px;color:var(--warn);background:var(--warn-bg);border-radius:var(--r-sm);padding:7px 9px}
+.op-stages{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px}
+.op-stage{background:var(--surface-2);border-radius:var(--r-md);padding:12px;display:grid;gap:5px;align-content:start;opacity:.55}
+.op-stage.on{opacity:1;background:var(--accent-soft)}
+.op-stage b{font-size:14px}
+.op-stage-items{font-size:12.5px;font-weight:600}
+.op-notes{margin:12px 0 0;padding-left:18px;display:grid;gap:6px;font-size:13.5px;max-width:66ch}
+.op-foot{display:block;margin-top:26px;padding-top:12px;border-top:1px solid var(--line);font-size:11.5px;color:var(--muted)}
+@media (max-width:700px){.op-stages{grid-template-columns:1fr}}
+
+/* Money map */
+.map{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;margin-top:14px}
+.map div{background:var(--surface);padding:12px 14px}
+.map b{display:block;font-family:var(--display);font-size:21px;font-weight:800;margin-top:2px}
+.map span{font-size:12px;color:var(--muted)}
+.map .hl{background:var(--band)}
+.map .hl .eyebrow,.map .hl span{color:var(--band-ink)}
+
+/* Property cards */
+.props{display:grid;gap:12px;margin-top:16px}
+.prop{border:1px solid var(--line);border-radius:var(--r-md);padding:16px;background:var(--surface)}
+.prophead{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.prophead .who{flex:1;min-width:200px}
+.prophead h3{font-size:18px;font-weight:700;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pickers{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+@media (max-width:640px){.pickers{grid-template-columns:1fr}}
+.pickers select{font-size:13.5px;padding:7px 9px}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:10px 14px;margin-top:12px}
+.kv .k{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.kv .v{font-weight:700;font-variant-numeric:tabular-nums}
+.kv .v small{display:block;font-weight:400;font-size:11.5px;color:var(--muted)}
+details.bd{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
+details.bd>summary{cursor:pointer;font-weight:600;color:var(--accent);font-size:13.5px}
+.bdgrid{display:grid;gap:14px;margin-top:10px}
+@media (min-width:900px){.bdgrid{grid-template-columns:1fr 1fr}}
+.sheet{width:100%;border:1px solid var(--ink);font-size:13px}
+.sheet td{padding:6px 10px;border-bottom:1px solid var(--line);white-space:normal}
+.sheet td:last-child{white-space:nowrap;width:1%}
+.sheet .band td{background:var(--band);color:var(--band-ink);font-weight:800;text-align:center;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink)}
+.sheet .band.var td{background:var(--varband);color:var(--ink)}
+.sheet .sec td{text-decoration:underline;color:var(--ink);padding-top:9px}
+.sheet .tot td{font-weight:700}
+.sheet .grand td{font-weight:800;background:var(--band);color:var(--band-ink);border-top:1px solid var(--ink)}
+.sheet .grand.var td{background:var(--varband);color:var(--ink)}
+.sheet .who{font-size:11.5px;color:var(--neg)}
+.sheet .z td:last-child{color:var(--muted)}
+.why{margin-top:10px;font-size:13px}
+.why summary{cursor:pointer;color:var(--accent);font-weight:600;font-size:12.5px}
+.why ul{margin:6px 0 4px;padding-left:18px;display:grid;gap:3px;max-width:70ch}
+
+.picks{display:grid;gap:12px;margin-top:14px}
+.picks{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.pick{border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.pick.off{opacity:.5}
+.pick .rank{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.pick h3{font-size:18px}
+.pick .kv{margin-top:0}
+.flow{display:grid;gap:10px;align-items:center;margin-top:12px}
+@media (min-width:720px){.flow{grid-template-columns:1fr auto 1fr auto 1fr}}
+.flow .box{background:var(--surface-2);border-radius:12px;padding:12px 14px}
+.flow .box b{display:block;font-family:var(--display);font-size:20px}
+.flow .arrow{color:var(--accent);font-weight:800;text-align:center;font-size:20px}
+@media (max-width:719px){.flow .arrow{transform:rotate(90deg)}}
+
+.lib{min-width:1200px}
+.lib input,.lib select{padding:6px 8px;font-size:13px;border-radius:7px;min-width:90px}
+.lib input[type=text]{min-width:120px}
+.lib td{padding:6px 4px}
+.copied{font-size:13px;color:var(--pos);align-self:center}
+#copyFallback{width:100%;min-height:160px;margin-top:10px;font:13px/1.5 var(--body);background:var(--surface-2);color:var(--ink);border:0;border-radius:9px;padding:10px}
+.disclaimer{font-size:12px;color:var(--muted);max-width:95ch}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media print{
+  @page{margin:14mm}
+  /* With the one-pager open, the client document is the only thing that prints */
+  body:has(#onePager:not([hidden])) .wrap{display:none}
+  #onePager{position:static;overflow:visible;background:#fff}
+  .op-bar{display:none}
+  .op-page{max-width:none;padding:0;animation:none}
+  .op-props>li,.op-tile,.op-stage{break-inside:avoid}
+  .op-page h2{break-after:avoid}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .panel,.actions,#libraryCard,#scoreCard,.stages,.pickers,#goalChips,details.more{display:none!important}
+  .layout{grid-template-columns:1fr}
+  body{background:#fff;font-size:12.5px}
+  .wrap{padding:0;max-width:none}
+  .top h1{font-size:28px}
+  .card,.panel{box-shadow:none}
+  /* Breakdowns are opened before printing (see beforeprint), and a property never splits across pages */
+  details>summary{display:none}
+  .prop,.tblock,.rstage,.fact,.exec>div,.banner,.plan{break-inside:avoid}
+  .card,.props,.map,.exec{break-inside:auto}
+  h2,h3{break-after:avoid}
+  .plans{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .plan{border-width:1px}
+  .plan[aria-pressed="false"]{opacity:.55}
+}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <span class="eyebrow">Property portfolio planner</span>
+      <h1>Your goal in, <em>your properties</em> out.</h1>
+      <p>Tell us where the client is today. The planner places them on FAR Capital's property investment journey (Stage 1 to 3) and recommends properties that fit their loan eligibility, with the full cost breakdown.</p>
+    </div>
+    <div class="stages" id="stages" aria-label="Roadmap by age"></div>
+  </header>
+
+  <div class="layout">
+    <aside class="panel" id="form" aria-label="Client details">
+      <fieldset class="fs">
+        <legend>1 · About the client</legend>
+        <div class="field">
+          <label for="clientName">Client name (for the one-pager)</label>
+          <input type="text" id="clientName" placeholder="e.g. Nurul Aisyah binti Rahman" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="age">Age</label>
+          <div class="agebox">
+            <input type="range" id="age" min="21" max="65" value="32">
+            <output id="ageOut" for="age">32</output>
+          </div>
+        </div>
+        <div class="field">
+          <span class="flabel">Nationality</span>
+          <div class="seg">
+            <input type="radio" name="nat" id="natMy" value="my" checked><label for="natMy">Malaysian</label>
+            <input type="radio" name="nat" id="natFx" value="fx"><label for="natFx">Singaporean / foreign</label>
+          </div>
+        </div>
+        <div class="field" id="bumiField">
+          <span class="flabel">Bumiputera status</span>
+          <div class="seg">
+            <input type="radio" name="bumi" id="bumiYes" value="yes" checked><label for="bumiYes">Bumiputera</label>
+            <input type="radio" name="bumi" id="bumiNo" value="no"><label for="bumiNo">Non-Bumiputera</label>
+          </div>
+        </div>
+        <div class="field" id="empField">
+          <span class="flabel">Employment</span>
+          <div class="seg">
+            <input type="radio" name="emp" id="empPriv" value="priv" checked><label for="empPriv">Private / self-employed</label>
+            <input type="radio" name="emp" id="empGov" value="gov"><label for="empGov">Government servant</label>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="fs">
+        <legend>2 · Loan power</legend>
+        <div class="field">
+          <label for="income">Monthly income</label>
+          <div class="money"><input type="number" id="income" value="12000" step="500" min="0" inputmode="numeric"></div>
+        </div>
+        <p class="hint">Projects with a higher minimum salary are left out of the plans.</p>
+        <div class="field">
+          <span class="flabel">How do you want to enter eligibility?</span>
+          <div class="seg">
+            <input type="radio" name="eligMode" id="modeDirect" value="direct" checked><label for="modeDirect">I know my eligibility</label>
+            <input type="radio" name="eligMode" id="modeIncome" value="income"><label for="modeIncome">Estimate from income</label>
+          </div>
+        </div>
+        <div class="field" id="directField">
+          <label for="elig">Max bank loan eligibility</label>
+          <div class="money"><input type="number" id="elig" value="1800000" step="50000" min="0" max="5000000" inputmode="numeric"></div>
+        </div>
+        <div id="incomeFields" hidden>
+          <div class="field">
+            <label for="commit">Existing monthly debts</label>
+            <div class="money"><input type="number" id="commit" value="2000" step="100" min="0" inputmode="numeric"></div>
+          </div>
+          <p class="hint" id="incomeHint"></p>
+        </div>
+        <div class="field" id="lppsaField" hidden>
+          <label for="lppsaElig">LPPSA eligibility</label>
+          <div class="money"><input type="number" id="lppsaElig" value="750000" step="50000" min="0" inputmode="numeric"></div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label for="existing">Residential properties already owned</label>
+            <input type="number" id="existing" value="0" min="0" max="10" inputmode="numeric">
+          </div>
+          <div class="field">
+            <label for="cash">Savings / cash on hand</label>
+            <div class="money"><input type="number" id="cash" value="50000" step="5000" min="0" inputmode="numeric"></div>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="fs">
+        <legend>3 · Where the client is today</legend>
+        <p class="flabel" style="margin:4px 0 8px">Bad debts to clear (car, credit card, personal loan)</p>
+        <div class="row2">
+          <div class="field">
+            <label for="debtPL">Personal loan outstanding</label>
+            <div class="money"><input type="number" id="debtPL" value="0" step="1000" min="0" inputmode="numeric"></div>
+          </div>
+          <div class="field">
+            <label for="debtCC">Credit card outstanding</label>
+            <div class="money"><input type="number" id="debtCC" value="0" step="1000" min="0" inputmode="numeric"></div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="debtCar">Car loan outstanding</label>
+          <div class="money"><input type="number" id="debtCar" value="0" step="1000" min="0" inputmode="numeric"></div>
+        </div>
+        <p class="hint" id="debtHint">The first property recommended must give enough cash back to clear these debts.</p>
+        <div class="field">
+          <label for="stageSel">Start the roadmap at</label>
+          <select id="stageSel">
+            <option value="auto" selected>Auto, from debts, savings and age</option>
+            <option value="1">Stage 1 · Immediate goals</option>
+            <option value="2">Stage 2 · Medium-term goals</option>
+            <option value="3">Stage 3 · Long-term wealth</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="maxUnits">Most properties I'm willing to buy</label>
+          <input type="number" id="maxUnits" value="3" min="1" max="5" inputmode="numeric">
+        </div>
+      </fieldset>
+
+      <fieldset class="fs">
+        <legend>4 · My goal</legend>
+        <div class="field">
+          <label for="goalCash">Cash I want in hand</label>
+          <div class="money"><input type="number" id="goalCash" value="0" step="5000" min="0" inputmode="numeric"></div>
+          <div class="chips" id="goalChips"></div>
+        </div>
+        <div class="field">
+          <label for="goalCf">Monthly income I want</label>
+          <div class="money"><input type="number" id="goalCf" value="1000" step="500" min="0" inputmode="numeric"></div>
+        </div>
+        <p class="hint">Tap a button to add it to the cash goal. Leave a box at 0 if it is not a goal yet.</p>
+      </fieldset>
+
+      <fieldset class="fs">
+        <legend>Assumptions</legend>
+        <div class="row2">
+          <div class="field">
+            <label for="growth">Property growth a year (%)</label>
+            <input type="number" id="growth" value="3.5" step="0.5" min="0" max="15" inputmode="decimal">
+          </div>
+          <div class="field">
+            <label for="horizon">Hold for (years)</label>
+            <input type="number" id="horizon" value="10" step="1" min="1" max="30" inputmode="numeric">
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label for="rate">Bank rate (%)</label>
+            <input type="number" id="rate" value="3.7" step="0.05" min="0" inputmode="decimal">
+          </div>
+          <div class="field">
+            <label for="lppsaRate">LPPSA rate (%)</label>
+            <input type="number" id="lppsaRate" value="4" step="0.05" min="0" inputmode="decimal">
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label for="rentStrategy">Rental strategy</label>
+            <select id="rentStrategy">
+              <option value="default" selected>Project default</option>
+              <option value="arp">ARP where offered</option>
+              <option value="whole">Whole-unit rental</option>
+              <option value="str">Short-term (Airbnb)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="arpPct">ARP package</label>
+            <select id="arpPct">
+              <option value="3">M40 · 3%</option>
+              <option value="4">T20 · 4%</option>
+              <option value="6" selected>T1 · 6%</option>
+              <option value="7">ECF · 7%</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <span class="flabel">Short-term rental occupancy</span>
+          <div class="seg">
+            <input type="radio" name="occ" id="occCur" value="0" checked><label for="occCur">Current</label>
+            <input type="radio" name="occ" id="occBest" value="1"><label for="occBest">Best case</label>
+            <input type="radio" name="occ" id="occWorst" value="2"><label for="occWorst">Worst case</label>
+          </div>
+        </div>
+        <details class="more">
+          <summary>More assumptions</summary>
+          <div class="field">
+            <span class="flabel">Cashflow calculated with instalment on</span>
+            <div class="seg">
+              <input type="radio" name="instBasis" id="instLoan" value="loan" checked><label for="instLoan">Full loan (as calculators)</label>
+              <input type="radio" name="instBasis" id="instNett" value="nett"><label for="instNett">Nett price (deal sheet)</label>
+            </div>
+          </div>
+          <label class="check"><input type="checkbox" id="inclVar"><span>Client must cover variable costs too<small>Only show plans where cash on hand also pays renovation, POT/POC, deposits and vacancy.</small></span></label>
+          <p class="hint" style="margin-top:0">Price-list projects (Fujii, D'Citrine, Damansara Livista) have no rent or legal-cost data yet. Estimates:</p>
+          <div class="row2">
+            <div class="field">
+              <label for="rentYield">Rent yield on SPA (%)</label>
+              <input type="number" id="rentYield" value="4" step="0.25" min="0" inputmode="decimal">
+            </div>
+            <div class="field">
+              <label for="listRenoPsf">Renovation (RM psf)</label>
+              <input type="number" id="listRenoPsf" value="30" step="5" min="0" inputmode="numeric">
+            </div>
+          </div>
+          <div class="field">
+            <label for="listMaintPsf">Maintenance (RM psf / month)</label>
+            <input type="number" id="listMaintPsf" value="0.35" step="0.01" min="0" inputmode="decimal">
+          </div>
+          <p class="hint" style="margin-top:0">Deal-sheet projects you add use these estimates:</p>
+          <div class="row2">
+            <div class="field">
+              <label for="genMaint">Maintenance / month</label>
+              <div class="money"><input type="number" id="genMaint" value="300" step="50" min="0" inputmode="numeric"></div>
+            </div>
+            <div class="field">
+              <label for="genReno">Renovation</label>
+              <div class="money"><input type="number" id="genReno" value="20000" step="1000" min="0" inputmode="numeric"></div>
+            </div>
+          </div>
+          <div class="row2">
+            <div class="field">
+              <label for="dsr">DSR limit (%)</label>
+              <input type="number" id="dsr" value="70" step="5" min="30" max="90" inputmode="numeric">
+            </div>
+            <div class="field">
+              <label for="fxMin">Foreign min. price</label>
+              <div class="money"><input type="number" id="fxMin" value="1000000" step="50000" min="0" inputmode="numeric"></div>
+            </div>
+          </div>
+          <div class="row2">
+            <div class="field">
+              <label for="ageCap">Loan must end by age</label>
+              <input type="number" id="ageCap" value="70" min="55" max="80" inputmode="numeric">
+            </div>
+            <div class="field">
+              <label for="maxTenure">Max tenure (years)</label>
+              <input type="number" id="maxTenure" value="35" min="5" max="35" inputmode="numeric">
+            </div>
+          </div>
+        </details>
+      </fieldset>
+      <fieldset class="fs">
+        <legend>5 · Sell 1, free 3 (optional)</legend>
+        <label class="check"><input type="checkbox" id="sellOn"><span>Sell an existing property first<small>Releases equity to fund new purchases and brings the property count down by one, so the next purchase can get 90%.</small></span></label>
+        <div id="sellFields" hidden>
+          <div class="row2">
+            <div class="field">
+              <label for="sellValue">Selling price</label>
+              <div class="money"><input type="number" id="sellValue" value="1000000" step="10000" min="0" inputmode="numeric"></div>
+            </div>
+            <div class="field">
+              <label for="sellLoan">Loan to repay</label>
+              <div class="money"><input type="number" id="sellLoan" value="500000" step="10000" min="0" inputmode="numeric"></div>
+            </div>
+          </div>
+          <div class="row2">
+            <div class="field">
+              <label for="sellInst">Its monthly instalment</label>
+              <div class="money"><input type="number" id="sellInst" value="2500" step="100" min="0" inputmode="numeric"></div>
+            </div>
+            <div class="field">
+              <label for="sellCost">Selling costs (%)</label>
+              <input type="number" id="sellCost" value="0" step="0.5" min="0" max="10" inputmode="decimal">
+            </div>
+          </div>
+        </div>
+      </fieldset>
+    </aside>
+
+    <main>
+      <section class="facts" id="facts" aria-label="Loan position"></section>
+      <section class="card" id="stageCard"></section>
+      <section class="card" id="targetCard"></section>
+      <div id="banner"></div>
+
+      </section>
+
+      <section>
+        <div class="sectionhead">
+          <div>
+            <h2>Recommended plan and alternatives</h2>
+            <p id="plansSub">Tap a plan to see the buying sequence.</p>
+          </div>
+          <button class="btn small" type="button" id="resetPicks" hidden>Let the planner choose units again</button>
+        </div>
+        <div class="plans" id="plans" style="margin-top:12px"></div>
+      </section>
+
+      <section class="card" id="detail"></section>
+
+      <section class="card" id="scoreCard">
+        <div class="sectionhead">
+          <div>
+            <h2>Every project, side by side</h2>
+            <p>Best cash-out unit per project at each financing level that fits this client's loan eligibility. Click a project for its full breakdown.</p>
+          </div>
+        </div>
+        <div class="tablewrap"><table class="wide" id="scoreTable"></table></div>
+        <div id="projDetail"></div>
+      </section>
+
+      <details class="card" id="libraryCard">
+        <summary style="cursor:pointer;list-style:none"><div class="sectionhead"><div><h2>Deal-sheet projects</h2><p>Projects without an Excel calculator. Edit figures or add new ones; leave a cash-out cell blank to calculate from market price × LTV. Saved in this browser only.</p></div><span class="btn small">Edit</span></div></summary>
+        <div class="tablewrap"><table class="lib" id="libTable"></table></div>
+        <div class="actions" style="margin-top:12px">
+          <button class="btn" type="button" id="addRow">Add project</button>
+          <button class="btn" type="button" id="resetLib">Restore original list</button>
+        </div>
+      </details>
+
+      <div id="sellFlow" hidden></div>
+      <div id="onePager" hidden aria-modal="true" role="dialog" aria-label="Client one-pager"></div>
+
+      <p class="disclaimer">For illustration only, not financial advice or a loan offer. Figures follow FAR Capital's project Excel calculators and deal sheets as a reference; actual loan approval, margin of finance, valuation, legal costs, rental and ARP returns depend on the bank, LPPSA, developer terms and market conditions. Clients should do their own due diligence.</p>
+    </main>
+  </div>
+</div>
+
+<script>
+(function(){
+  // ---------- Unit price lists from the project Excel calculators ----------
+  const UNITS = {"laatinn":[{"l":"J-23A-01","t":"YYY","s":712,"p":695000,"n":427200,"m":14850,"mf":55600,"b":"Dual Key"},{"l":"J-23A-02","t":"ZZZ","s":592,"p":581000,"n":355200,"m":11430,"mf":46480,"b":"1+1"},{"l":"J-23A-03","t":"AAAA","s":620,"p":608000,"n":372000,"m":12240,"mf":48640,"b":"Dual Key"},{"l":"J-23A-03A","t":"BBBB","s":779,"p":757000,"n":467400,"m":16710,"mf":60560,"b":"Dual Key"},{"l":"J-23A-05","t":"CCC","s":607,"p":596000,"n":364200,"m":11880,"mf":47680,"b":"1+1"},{"l":"J-23A-06","t":"DDD","s":560,"p":551000,"n":336000,"m":10530,"mf":44080,"b":"1R"},{"l":"J-23A-07","t":"EEE","s":560,"p":551000,"n":336000,"m":10530,"mf":44080,"b":"1+1"},{"l":"J-23A-08","t":"FFF","s":559,"p":550000,"n":335400,"m":10500,"mf":44000,"b":"1+1"},{"l":"J-23A-09","t":"GGG","s":568,"p":559000,"n":340800,"m":10770,"mf":44720,"b":"1+1"},{"l":"J-23A-10","t":"HHH","s":634,"p":621000,"n":380400,"m":12630,"mf":49680,"b":"1+1"},{"l":"J-23A-11","t":"III","s":677,"p":661000,"n":406200,"m":13830,"mf":52880,"b":"2R"},{"l":"J-23A-12","t":"JJJ","s":675,"p":659000,"n":405000,"m":13770,"mf":52720,"b":"1+1"},{"l":"J-23A-13","t":"KKK","s":561,"p":552000,"n":336600,"m":10560,"mf":44160,"b":"1R"},{"l":"J-23A-13A","t":"QQQ","s":578,"p":568000,"n":346800,"m":11040,"mf":45440,"b":"2R"},{"l":"J-25-01","t":"YYY","s":712,"p":695000,"n":427200,"m":14850,"mf":55600,"b":"Dual Key"},{"l":"J-25-02","t":"ZZZ","s":592,"p":581000,"n":355200,"m":11430,"mf":46480,"b":"1+1"},{"l":"J-25-03","t":"AAAA","s":620,"p":608000,"n":372000,"m":12240,"mf":48640,"b":"Dual Key"},{"l":"J-25-03A","t":"BBBB","s":779,"p":757000,"n":467400,"m":16710,"mf":60560,"b":"Dual Key"},{"l":"J-25-05","t":"CCC","s":607,"p":596000,"n":364200,"m":11880,"mf":47680,"b":"1+1"},{"l":"J-25-06","t":"DDD","s":560,"p":551000,"n":336000,"m":10530,"mf":44080,"b":"1R"},{"l":"J-25-07","t":"EEE","s":560,"p":551000,"n":336000,"m":10530,"mf":44080,"b":"1+1"},{"l":"J-25-08","t":"FFF","s":559,"p":550000,"n":335400,"m":10500,"mf":44000,"b":"1+1"},{"l":"J-25-09","t":"GGG","s":568,"p":559000,"n":340800,"m":10770,"mf":44720,"b":"1+1"},{"l":"J-25-10","t":"HHH","s":634,"p":621000,"n":380400,"m":12630,"mf":49680,"b":"1+1"},{"l":"J-25-11","t":"III","s":677,"p":661000,"n":406200,"m":13830,"mf":52880,"b":"2R"},{"l":"J-25-12","t":"JJJ","s":675,"p":659000,"n":405000,"m":13770,"mf":52720,"b":"1+1"},{"l":"J-25-13","t":"KKK","s":561,"p":552000,"n":336600,"m":10560,"mf":44160,"b":"1R"},{"l":"J-25-13A","t":"QQQ","s":578,"p":568000,"n":346800,"m":11040,"mf":45440,"b":"2R"}],"sabrina":[{"l":"A-12B-11","t":"A","s":657,"p":636000,"n":496080,"pb":604200,"nb":471276,"b":"2bd"},{"l":"A-12A-03","t":"A","s":657,"p":638000,"n":497640,"pb":606100,"nb":472758,"b":"2bd"},{"l":"A-12B-03","t":"A","s":657,"p":641000,"n":499980,"pb":608950,"nb":474981,"b":"2bd"},{"l":"A-15-03","t":"A","s":657,"p":645000,"n":503100,"pb":612750,"nb":477945,"b":"2bd"},{"l":"A-17-11","t":"A","s":657,"p":646000,"n":503880,"pb":613700,"nb":478686,"b":"2bd"},{"l":"A-09-02","t":"A","s":657,"p":647000,"n":504660,"pb":614650,"nb":479427,"b":"2bd"},{"l":"A-16-03","t":"A","s":657,"p":648000,"n":505440,"pb":615600,"nb":480168,"b":"2bd"},{"l":"A-10-02","t":"A","s":657,"p":650000,"n":507000,"pb":617500,"nb":481650,"b":"2bd"},{"l":"A-17-03","t":"A","s":657,"p":651000,"n":507780,"pb":618450,"nb":482391,"b":"2bd"},{"l":"A-11-02","t":"A","s":657,"p":655000,"n":510900,"pb":622250,"nb":485355,"b":"2bd"},{"l":"A-12-02","t":"A","s":657,"p":657000,"n":512460,"pb":624150,"nb":486837,"b":"2bd"},{"l":"A-19-03","t":"A","s":657,"p":658000,"n":513240,"pb":625100,"nb":487578,"b":"2bd"},{"l":"A-12A-02","t":"A","s":657,"p":660000,"n":514800,"pb":627000,"nb":489060,"b":"2bd"},{"l":"A-12B-02","t":"A","s":657,"p":664000,"n":517920,"pb":630800,"nb":492024,"b":"2bd"},{"l":"A-18-03","t":"A","s":657,"p":664000,"n":517920,"pb":630800,"nb":492024,"b":"2bd"},{"l":"C-20-12","t":"A","s":657,"p":665000,"n":518700,"pb":631750,"nb":492765,"b":"2bd"},{"l":"C-21-02","t":"A","s":657,"p":665000,"n":518700,"pb":631750,"nb":492765,"b":"2bd"},{"l":"C-21-09","t":"A","s":657,"p":665000,"n":518700,"pb":631750,"nb":492765,"b":"2bd"},{"l":"A-15-02","t":"A","s":657,"p":667000,"n":520260,"pb":633650,"nb":494247,"b":"2bd"},{"l":"C-23-02","t":"A","s":657,"p":670000,"n":522600,"pb":636500,"nb":496470,"b":"2bd"},{"l":"C-23-09","t":"A","s":657,"p":670000,"n":522600,"pb":636500,"nb":496470,"b":"2bd"},{"l":"C-23A-02","t":"A","s":657,"p":673000,"n":524940,"pb":639350,"nb":498693,"b":"2bd"},{"l":"C-23A-09","t":"A","s":657,"p":673000,"n":524940,"pb":639350,"nb":498693,"b":"2bd"},{"l":"A-17-02","t":"A","s":657,"p":675000,"n":526500,"pb":641250,"nb":500175,"b":"2bd"},{"l":"C-25-02","t":"A","s":657,"p":675000,"n":526500,"pb":641250,"nb":500175,"b":"2bd"},{"l":"C-25-09","t":"A","s":657,"p":675000,"n":526500,"pb":641250,"nb":500175,"b":"2bd"},{"l":"A-25-03","t":"A","s":657,"p":679000,"n":529620,"pb":645050,"nb":503139,"b":"2bd"},{"l":"C-29-02","t":"A","s":657,"p":682000,"n":531960,"pb":647900,"nb":505362,"b":"2bd"},{"l":"A-20-02","t":"A","s":657,"p":684000,"n":533520,"pb":649800,"nb":506844,"b":"2bd"},{"l":"A-18-02","t":"A","s":657,"p":686000,"n":535080,"pb":651700,"nb":508326,"b":"2bd"},{"l":"C-18-12B","t":"A","s":657,"p":686000,"n":535080,"pb":651700,"nb":508326,"b":"2bd"},{"l":"C-26-09","t":"A","s":657,"p":687000,"n":535860,"pb":652650,"nb":509067,"b":"2bd"},{"l":"A-28-11","t":"A","s":657,"p":689000,"n":537420,"pb":654550,"nb":510549,"b":"2bd"},{"l":"A-29-03","t":"A","s":657,"p":689000,"n":537420,"pb":654550,"nb":510549,"b":"2bd"},{"l":"C-21-12A","t":"A","s":657,"p":690000,"n":538200,"pb":655500,"nb":511290,"b":"2bd"},{"l":"C-27-02","t":"A","s":657,"p":690000,"n":538200,"pb":655500,"nb":511290,"b":"2bd"},{"l":"C-27-09","t":"A","s":657,"p":690000,"n":538200,"pb":655500,"nb":511290,"b":"2bd"},{"l":"C-28-09","t":"A","s":657,"p":690000,"n":538200,"pb":655500,"nb":511290,"b":"2bd"},{"l":"C-23A-12B","t":"A","s":657,"p":691000,"n":538980,"pb":656450,"nb":512031,"b":"2bd"},{"l":"C-27-12","t":"A","s":657,"p":692000,"n":539760,"pb":657400,"nb":512772,"b":"2bd"},{"l":"C-28-12","t":"A","s":657,"p":692000,"n":539760,"pb":657400,"nb":512772,"b":"2bd"},{"l":"C-25-12B","t":"A","s":657,"p":693000,"n":540540,"pb":658350,"nb":513513,"b":"2bd"},{"l":"A-23-02","t":"A","s":657,"p":695000,"n":542100,"pb":660250,"nb":514995,"b":"2bd"},{"l":"A-27-03","t":"A","s":657,"p":695000,"n":542100,"pb":660250,"nb":514995,"b":"2bd"},{"l":"C-23-12A","t":"A","s":657,"p":695000,"n":542100,"pb":660250,"nb":514995,"b":"2bd"},{"l":"A-23A-02","t":"A","s":657,"p":698000,"n":544440,"pb":663100,"nb":517218,"b":"2bd"},{"l":"C-29-09","t":"A","s":657,"p":701000,"n":546780,"pb":665950,"nb":519441,"b":"2bd"},{"l":"C-28-02","t":"A","s":657,"p":702000,"n":547560,"pb":666900,"nb":520182,"b":"2bd"},{"l":"A-28-03","t":"A","s":657,"p":706000,"n":550680,"pb":670700,"nb":523146,"b":"2bd"},{"l":"C-26-12B","t":"A","s":657,"p":706000,"n":550680,"pb":670700,"nb":523146,"b":"2bd"},{"l":"C-27-12B","t":"A","s":657,"p":708000,"n":552240,"pb":672600,"nb":524628,"b":"2bd"},{"l":"A-29-02","t":"A","s":657,"p":711000,"n":554580,"pb":675450,"nb":526851,"b":"2bd"},{"l":"C-26-12A","t":"A","s":657,"p":712000,"n":555360,"pb":676400,"nb":527592,"b":"2bd"},{"l":"A-09-3A","t":"B","s":753,"p":714000,"n":556920,"pb":678300,"nb":529074,"b":"2bd"},{"l":"C-28-12A","t":"A","s":657,"p":714000,"n":556920,"pb":678300,"nb":529074,"b":"2bd"},{"l":"A-27-02","t":"A","s":657,"p":717000,"n":559260,"pb":681150,"nb":531297,"b":"2bd"},{"l":"A-28-10","t":"A","s":657,"p":718000,"n":560040,"pb":682100,"nb":532038,"b":"2bd"},{"l":"C-28-12B","t":"A","s":657,"p":720000,"n":561600,"pb":684000,"nb":533520,"b":"2bd"},{"l":"A-12-3A","t":"B","s":753,"p":725000,"n":565500,"pb":688750,"nb":537225,"b":"2bd"},{"l":"A-09-05","t":"B","s":753,"p":726000,"n":566280,"pb":689700,"nb":537966,"b":"2bd"},{"l":"A-12A-3A","t":"B","s":753,"p":728000,"n":567840,"pb":691600,"nb":539448,"b":"2bd"},{"l":"A-28-02","t":"A","s":657,"p":729000,"n":568620,"pb":692550,"nb":540189,"b":"2bd"},{"l":"A-12B-3A","t":"B","s":753,"p":731000,"n":570180,"pb":694450,"nb":541671,"b":"2bd"},{"l":"A-15-3A","t":"B","s":753,"p":734000,"n":572520,"pb":697300,"nb":543894,"b":"2bd"},{"l":"A-16-3A","t":"B","s":753,"p":738000,"n":575640,"pb":701100,"nb":546858,"b":"2bd"},{"l":"A-12A-05","t":"B","s":753,"p":739000,"n":576420,"pb":702050,"nb":547599,"b":"2bd"},{"l":"A-12A-06","t":"B","s":753,"p":739000,"n":576420,"pb":702050,"nb":547599,"b":"2bd"},{"l":"A-12A-07","t":"B","s":753,"p":739000,"n":576420,"pb":702050,"nb":547599,"b":"2bd"},{"l":"A-12B-05","t":"B","s":753,"p":742000,"n":578760,"pb":704900,"nb":549822,"b":"2bd"},{"l":"A-12B-06","t":"B","s":753,"p":742000,"n":578760,"pb":704900,"nb":549822,"b":"2bd"},{"l":"A-12B-07","t":"B","s":753,"p":742000,"n":578760,"pb":704900,"nb":549822,"b":"2bd"},{"l":"A-19-3A","t":"B","s":753,"p":748000,"n":583440,"pb":710600,"nb":554268,"b":"2bd"},{"l":"A-16-05","t":"B","s":753,"p":749000,"n":584220,"pb":711550,"nb":555009,"b":"2bd"},{"l":"A-20-3A","t":"B","s":753,"p":751000,"n":585780,"pb":713450,"nb":556491,"b":"2bd"},{"l":"A-17-05","t":"B","s":753,"p":752000,"n":586560,"pb":714400,"nb":557232,"b":"2bd"},{"l":"A-18-3A","t":"B","s":753,"p":753000,"n":587340,"pb":715350,"nb":557973,"b":"2bd"},{"l":"A-21-3A","t":"B","s":753,"p":755000,"n":588900,"pb":717250,"nb":559455,"b":"2bd"},{"l":"A-22-3A","t":"B","s":753,"p":758000,"n":591240,"pb":720100,"nb":561678,"b":"2bd"},{"l":"A-19-05","t":"B","s":753,"p":759000,"n":592020,"pb":721050,"nb":562419,"b":"2bd"},{"l":"A-19-06","t":"B","s":753,"p":759000,"n":592020,"pb":721050,"nb":562419,"b":"2bd"},{"l":"A-23-3A","t":"B","s":753,"p":761000,"n":593580,"pb":722950,"nb":563901,"b":"2bd"},{"l":"C-28-07","t":"B","s":753,"p":761000,"n":593580,"pb":722950,"nb":563901,"b":"2bd"},{"l":"A-20-06","t":"B","s":753,"p":762000,"n":594360,"pb":723900,"nb":564642,"b":"2bd"},{"l":"A-18-05","t":"B","s":753,"p":765000,"n":596700,"pb":726750,"nb":566865,"b":"2bd"},{"l":"A-18-07","t":"B","s":753,"p":765000,"n":596700,"pb":726750,"nb":566865,"b":"2bd"},{"l":"A-23A-3A","t":"B","s":753,"p":765000,"n":596700,"pb":726750,"nb":566865,"b":"2bd"},{"l":"C-29-05","t":"B","s":753,"p":765000,"n":596700,"pb":726750,"nb":566865,"b":"2bd"},{"l":"C-29-06","t":"B","s":753,"p":765000,"n":596700,"pb":726750,"nb":566865,"b":"2bd"},{"l":"C-28-08","t":"B","s":753,"p":766000,"n":597480,"pb":727700,"nb":567606,"b":"2bd"},{"l":"A-25-3A","t":"B","s":753,"p":768000,"n":599040,"pb":729600,"nb":569088,"b":"2bd"},{"l":"A-22-05","t":"B","s":753,"p":769000,"n":599820,"pb":730550,"nb":569829,"b":"2bd"},{"l":"A-22-06","t":"B","s":753,"p":769000,"n":599820,"pb":730550,"nb":569829,"b":"2bd"},{"l":"A-23-05","t":"B","s":753,"p":772000,"n":602160,"pb":733400,"nb":572052,"b":"2bd"},{"l":"A-23A-05","t":"B","s":753,"p":776000,"n":605280,"pb":737200,"nb":575016,"b":"2bd"},{"l":"A-23A-06","t":"B","s":753,"p":776000,"n":605280,"pb":737200,"nb":575016,"b":"2bd"},{"l":"A-23A-07","t":"B","s":753,"p":776000,"n":605280,"pb":737200,"nb":575016,"b":"2bd"},{"l":"A-25-07","t":"B","s":753,"p":780000,"n":608400,"pb":741000,"nb":577980,"b":"2bd"},{"l":"A-29-3A","t":"B","s":753,"p":780000,"n":608400,"pb":741000,"nb":577980,"b":"2bd"},{"l":"A-27-3A","t":"B","s":753,"p":783000,"n":610740,"pb":743850,"nb":580203,"b":"2bd"},{"l":"A-29-05","t":"B","s":753,"p":790000,"n":616200,"pb":750500,"nb":585390,"b":"2bd"},{"l":"A-27-05","t":"B","s":753,"p":794000,"n":619320,"pb":754300,"nb":588354,"b":"2bd"},{"l":"A-27-06","t":"B","s":753,"p":794000,"n":619320,"pb":754300,"nb":588354,"b":"2bd"},{"l":"A-28-3A","t":"B","s":753,"p":796000,"n":620880,"pb":756200,"nb":589836,"b":"2bd"},{"l":"A-28-05","t":"B","s":753,"p":796000,"n":620880,"pb":756200,"nb":589836,"b":"2bd"},{"l":"A-28-06","t":"B","s":753,"p":796000,"n":620880,"pb":756200,"nb":589836,"b":"2bd"},{"l":"A-28-07","t":"B","s":753,"p":807000,"n":629460,"pb":766650,"nb":597987,"b":"2bd"}],"ferra":[{"l":"B-02-03","t":"A","s":1494,"p":883214,"n":618250,"m":0,"mf":0,"b":"3 bedrooms","v":"Hill"},{"l":"B-03-02","t":"A","s":1494,"p":886389,"n":620472,"m":0,"mf":0,"b":"3 bedrooms","v":"Hill"},{"l":"B-03-03","t":"A","s":1494,"p":791419,"n":609393,"m":0,"mf":0,"b":"3 bedrooms","v":"Hill"},{"l":"B-03-06","t":"A","s":1494,"p":791419,"n":609393,"m":0,"mf":0,"b":"3 bedrooms","v":"Hill"},{"l":"B-3A-02","t":"A","s":1494,"p":889564,"n":622695,"m":0,"mf":0,"b":"3 bedrooms","v":"Hill"},{"l":"B-3A-03","t":"A","s":1494,"p":889564,"n":622695,"m":0,"mf":0,"b":"3 bedrooms","v":"Hill"},{"l":"B-05-10","t":"A","s":1494,"p":951764,"n":666235,"m":0,"mf":0,"b":"3 bedrooms","v":"Sea"},{"l":"B-05-11","t":"A","s":1494,"p":951764,"n":666235,"m":0,"mf":0,"b":"3 bedrooms","v":"Sea"},{"l":"B-05-12","t":"A","s":1494,"p":951764,"n":666235,"m":0,"mf":0,"b":"3 bedrooms","v":"Sea"},{"l":"B-05-15","t":"A","s":1494,"p":951764,"n":666235,"m":0,"mf":0,"b":"3 bedrooms","v":"Sea"},{"l":"B-06-10","t":"A","s":1494,"p":852435,"n":656375,"m":0,"mf":0,"b":"3 bedrooms","v":"Sea"},{"l":"B-06-11","t":"A","s":1494,"p":852435,"n":656375,"m":0,"mf":0,"b":"3 bedrooms","v":"Sea"},{"l":"B-06-12","t":"A","s":1494,"p":954728,"n":668310,"m":0,"mf":0,"b":"3 bedrooms","v":"Sea"},{"l":"B-06-13","t":"A","s":1494,"p":954728,"n":668310,"m":0,"mf":0,"b":"3 bedrooms","v":"Sea"},{"l":"B-07-11","t":"A","s":1494,"p":855081,"n":658412,"m":0,"mf":0,"b":"3 bedrooms","v":"Sea"},{"l":"B-23-02","t":"A","s":1494,"p":969278,"n":678495,"m":0,"mf":0,"b":"3 bedrooms","v":"Hill"},{"l":"B-23A-02","t":"A","s":1494,"p":972518,"n":680763,"m":0,"mf":0,"b":"3 bedrooms","v":"Hill"},{"l":"B-23A-03","t":"A","s":1494,"p":972518,"n":680763,"m":0,"mf":0,"b":"3 bedrooms","v":"Hill"},{"l":"B-23A-06","t":"A","s":1494,"p":972518,"n":680763,"m":0,"mf":0,"b":"3 bedrooms","v":"Hill"},{"l":"B-23A-07","t":"A","s":1494,"p":972518,"n":680763,"m":0,"mf":0,"b":"3 bedrooms","v":"Hill"},{"l":"B-23A-10","t":"A","s":1494,"p":1028644,"n":720051,"m":0,"mf":57146,"b":"3 bedrooms","v":"Sea"},{"l":"B-23A-11","t":"A","s":1494,"p":1028644,"n":720051,"m":0,"mf":57146,"b":"3 bedrooms","v":"Sea"},{"l":"B-23A-12","t":"A","s":1494,"p":1028644,"n":720051,"m":0,"mf":57146,"b":"3 bedrooms","v":"Sea"},{"l":"B-25-02","t":"A","s":1494,"p":975758,"n":683031,"m":0,"mf":0,"b":"3 bedrooms","v":"Hill"},{"l":"B-25-07","t":"A","s":1494,"p":975758,"n":683031,"m":0,"mf":0,"b":"3 bedrooms","v":"Hill"},{"l":"B-25-12","t":"A","s":1494,"p":1031668,"n":845968,"m":0,"mf":57267,"b":"3 bedrooms","v":"Sea"},{"l":"B-26-02","t":"A","s":1494,"p":978998,"n":685299,"m":0,"mf":0,"b":"3 bedrooms","v":"Hill"},{"l":"B-26-07","t":"A","s":1494,"p":978998,"n":685299,"m":0,"mf":0,"b":"3 bedrooms","v":"Hill"},{"l":"B-26-11","t":"A","s":1494,"p":1034692,"n":724284,"m":0,"mf":57388,"b":"3 bedrooms","v":"Sea"},{"l":"B-26-12","t":"A","s":1494,"p":1034692,"n":724284,"m":0,"mf":57388,"b":"3 bedrooms","v":"Sea"},{"l":"B-27-02","t":"A","s":1494,"p":982238,"n":687567,"m":0,"mf":0,"b":"3 bedrooms","v":"Hill"},{"l":"B-27-03","t":"A","s":1494,"p":982238,"n":687567,"m":0,"mf":0,"b":"3 bedrooms","v":"Hill"},{"l":"B-27-06","t":"A","s":1494,"p":982238,"n":687567,"m":0,"mf":0,"b":"3 bedrooms","v":"Hill"},{"l":"B-27-07","t":"A","s":1494,"p":982238,"n":687567,"m":0,"mf":0,"b":"3 bedrooms","v":"Hill"},{"l":"B-27-13","t":"A","s":1494,"p":1037716,"n":726401,"m":0,"mf":57416,"b":"3 bedrooms","v":"Sea"},{"l":"B-28-02","t":"A","s":1494,"p":985478,"n":689835,"m":0,"mf":0,"b":"3 bedrooms","v":"Hill"},{"l":"B-28-03","t":"A","s":1494,"p":985478,"n":689835,"m":0,"mf":0,"b":"3 bedrooms","v":"Hill"},{"l":"B-28-03A","t":"E","s":1208,"p":921570,"n":645099,"m":0,"mf":0,"b":"2 bedrooms","v":"Hill"},{"l":"B-28-06","t":"A","s":1494,"p":985478,"n":689835,"m":0,"mf":0,"b":"3 bedrooms","v":"Hill"},{"l":"B-28-07","t":"A","s":1494,"p":985478,"n":689835,"m":0,"mf":0,"b":"3 bedrooms","v":"Hill"},{"l":"B-29-02","t":"A","s":1494,"p":988718,"n":692103,"m":0,"mf":0,"b":"3 bedrooms","v":"Hill"},{"l":"B-29-03","t":"A","s":1494,"p":988718,"n":692103,"m":0,"mf":0,"b":"3 bedrooms","v":"Hill"},{"l":"B-29-03A","t":"E","s":1208,"p":826070,"n":578249,"m":0,"mf":0,"b":"2 bedrooms","v":"Hill"},{"l":"B-29-06","t":"A","s":1494,"p":988718,"n":692103,"m":0,"mf":0,"b":"3 bedrooms","v":"Hill"},{"l":"B-29-07","t":"A","s":1494,"p":988718,"n":692103,"m":0,"mf":0,"b":"3 bedrooms","v":"Hill"},{"l":"B-29-11","t":"A","s":1494,"p":1043764,"n":730635,"m":0,"mf":57751,"b":"3 bedrooms","v":"Sea"},{"l":"B-30-02","t":"A","s":1494,"p":991958,"n":694371,"m":0,"mf":0,"b":"3 bedrooms","v":"Hill"},{"l":"B-30-03","t":"A","s":1494,"p":991958,"n":694371,"m":0,"mf":0,"b":"3 bedrooms","v":"Hill"},{"l":"B-30-05","t":"E","s":1208,"p":829310,"n":580517,"m":0,"mf":0,"b":"2 bedrooms","v":"Hill"},{"l":"B-30-07","t":"A","s":1494,"p":991958,"n":694371,"m":0,"mf":0,"b":"3 bedrooms","v":"Hill"},{"l":"B-30-11","t":"A","s":1494,"p":1046788,"n":732752,"m":0,"mf":57872,"b":"3 bedrooms","v":"Sea"},{"l":"B-31-02","t":"A","s":1494,"p":995198,"n":696639,"m":0,"mf":0,"b":"3 bedrooms","v":"Hill"},{"l":"B-31-03","t":"A","s":1494,"p":995198,"n":696639,"m":0,"mf":0,"b":"3 bedrooms","v":"Hill"},{"l":"B-31-05","t":"E","s":1208,"p":832550,"n":582785,"m":0,"mf":0,"b":"2 bedrooms","v":"Hill"},{"l":"B-31-06","t":"A","s":1494,"p":995198,"n":696639,"m":0,"mf":0,"b":"3 bedrooms","v":"Hill"},{"l":"B-31-07","t":"A","s":1494,"p":995198,"n":696639,"m":0,"mf":0,"b":"3 bedrooms","v":"Hill"},{"l":"B-31-10","t":"A","s":1494,"p":1049812,"n":734868,"m":0,"mf":57992,"b":"3 bedrooms","v":"Sea"},{"l":"B-31-11","t":"A","s":1494,"p":1049812,"n":734868,"m":0,"mf":57992,"b":"3 bedrooms","v":"Sea"},{"l":"B-32-02","t":"A","s":1494,"p":998438,"n":698907,"m":0,"mf":0,"b":"3 bedrooms","v":"Hill"},{"l":"B-32-03","t":"A","s":1494,"p":998438,"n":698907,"m":0,"mf":0,"b":"3 bedrooms","v":"Hill"},{"l":"B-32-3A","t":"E","s":1208,"p":835790,"n":585053,"m":0,"mf":0,"b":"2 bedrooms","v":"Hill"},{"l":"B-32-06","t":"A","s":1494,"p":998438,"n":698907,"m":0,"mf":0,"b":"3 bedrooms","v":"Hill"},{"l":"B-32-07","t":"A","s":1494,"p":998438,"n":698907,"m":0,"mf":0,"b":"3 bedrooms","v":"Hill"},{"l":"B-32-10","t":"A","s":1494,"p":1052836,"n":736985,"m":0,"mf":58113,"b":"3 bedrooms","v":"Sea"},{"l":"B-32-12","t":"A","s":1494,"p":1052836,"n":736985,"m":0,"mf":58113,"b":"3 bedrooms","v":"Sea"},{"l":"B-32-13","t":"A","s":1494,"p":1052836,"n":736985,"m":0,"mf":58113,"b":"3 bedrooms","v":"Sea"},{"l":"B-32-13A","t":"A","s":1494,"p":1052836,"n":736985,"m":0,"mf":58113,"b":"3 bedrooms","v":"Sea"}],"reva":[{"l":"A-33A-5","t":"A1","s":812,"p":679000,"n":502460,"m":0,"b":"2B2B"},{"l":"A-33A-8","t":"A1(M)","s":812,"p":679000,"n":502460,"m":0,"b":"2B2B"},{"l":"A-31-3A","t":"A2","s":812,"p":681000,"n":503940,"m":0,"b":"2B2B"},{"l":"C-31-5","t":"A1","s":812,"p":681000,"n":503940,"m":0,"b":"2B2B"},{"l":"A-32-6","t":"A1(M)","s":812,"p":682000,"n":504680,"m":0,"b":"2B2B"},{"l":"A-33-8","t":"A1(M)","s":812,"p":683000,"n":505420,"m":0,"b":"2B2B"},{"l":"A-35-3A","t":"A2","s":812,"p":685000,"n":506900,"m":0,"b":"2B2B"},{"l":"A-35-5","t":"A1","s":812,"p":685000,"n":506900,"m":0,"b":"2B2B"},{"l":"A-36-3A","t":"A2","s":812,"p":686000,"n":507640,"m":0,"b":"2B2B"},{"l":"A-36-5","t":"A1","s":812,"p":686000,"n":507640,"m":0,"b":"2B2B"},{"l":"A-37-3A","t":"A2","s":812,"p":687000,"n":508380,"m":0,"b":"2B2B"},{"l":"A-37-5","t":"A1","s":812,"p":687000,"n":508380,"m":0,"b":"2B2B"},{"l":"A-37-8","t":"A1(M)","s":812,"p":687000,"n":508380,"m":0,"b":"2B2B"},{"l":"A-38-5","t":"A1","s":812,"p":687000,"n":508380,"m":0,"b":"2B2B"},{"l":"A-33A-6","t":"A2(M)","s":812,"p":688000,"n":509120,"m":0,"b":"2B2B"},{"l":"A-33A-7","t":"A2","s":812,"p":688000,"n":509120,"m":0,"b":"2B2B"},{"l":"A-39-5","t":"A1","s":812,"p":688000,"n":509120,"m":0,"b":"2B2B"},{"l":"A-39-8","t":"A1(M)","s":812,"p":688000,"n":509120,"m":0,"b":"2B2B"},{"l":"A-43A-3A","t":"A2","s":812,"p":688000,"n":509120,"m":0,"b":"2B2B"},{"l":"A-43A-5","t":"A1","s":812,"p":688000,"n":509120,"m":0,"b":"2B2B"},{"l":"A-43A-8","t":"A1(M)","s":812,"p":688000,"n":509120,"m":0,"b":"2B2B"},{"l":"A-40-3A","t":"A2","s":812,"p":689000,"n":509860,"m":0,"b":"2B2B"},{"l":"A-40-5","t":"A1","s":812,"p":689000,"n":509860,"m":0,"b":"2B2B"},{"l":"A-40-8","t":"A1(M)","s":812,"p":689000,"n":509860,"m":0,"b":"2B2B"},{"l":"A-41-3A","t":"A2","s":812,"p":690000,"n":510600,"m":0,"b":"2B2B"},{"l":"A-41-5","t":"A1","s":812,"p":690000,"n":510600,"m":0,"b":"2B2B"},{"l":"A-41-8","t":"A1(M)","s":812,"p":690000,"n":510600,"m":0,"b":"2B2B"},{"l":"C-31-6","t":"A2(M)","s":812,"p":690000,"n":510600,"m":0,"b":"2B2B"},{"l":"A-32-5","t":"A2","s":812,"p":691000,"n":511340,"m":0,"b":"2B2B"},{"l":"A-42-3A","t":"A2","s":812,"p":691000,"n":511340,"m":0,"b":"2B2B"},{"l":"A-42-5","t":"A1","s":812,"p":691000,"n":511340,"m":0,"b":"2B2B"},{"l":"A-42-8","t":"A1(M)","s":812,"p":691000,"n":511340,"m":0,"b":"2B2B"},{"l":"C-32-3A","t":"A2","s":812,"p":691000,"n":511340,"m":0,"b":"2B2B"},{"l":"A-33-6","t":"A2(M)","s":812,"p":692000,"n":512080,"m":0,"b":"2B2B"},{"l":"A-43-3A","t":"A2","s":812,"p":692000,"n":512080,"m":0,"b":"2B2B"},{"l":"A-43-5","t":"A1","s":812,"p":692000,"n":512080,"m":0,"b":"2B2B"},{"l":"A-43-8","t":"A1(M)","s":812,"p":692000,"n":512080,"m":0,"b":"2B2B"},{"l":"A-35-7","t":"A2","s":812,"p":694000,"n":513560,"m":0,"b":"2B2B"},{"l":"A-45-3A","t":"A2","s":812,"p":694000,"n":513560,"m":0,"b":"2B2B"},{"l":"A-45-5","t":"A1","s":812,"p":694000,"n":513560,"m":0,"b":"2B2B"},{"l":"A-45-8","t":"A1(M)","s":812,"p":694000,"n":513560,"m":0,"b":"2B2B"},{"l":"A-36-6","t":"A2(M)","s":812,"p":695000,"n":514300,"m":0,"b":"2B2B"},{"l":"A-36-7","t":"A2","s":812,"p":695000,"n":514300,"m":0,"b":"2B2B"},{"l":"A-46-3A","t":"A2","s":812,"p":695000,"n":514300,"m":0,"b":"2B2B"},{"l":"A-46-5","t":"A1","s":812,"p":695000,"n":514300,"m":0,"b":"2B2B"},{"l":"A-46-8","t":"A1(M)","s":812,"p":695000,"n":514300,"m":0,"b":"2B2B"},{"l":"A-37-6","t":"A2(M)","s":812,"p":696000,"n":515040,"m":0,"b":"2B2B"},{"l":"A-37-7","t":"A2","s":812,"p":696000,"n":515040,"m":0,"b":"2B2B"},{"l":"C-27-5","t":"A1","s":812,"p":696000,"n":515040,"m":0,"b":"2B2B"},{"l":"A-38-6","t":"A2(M)","s":812,"p":697000,"n":515780,"m":0,"b":"2B2B"},{"l":"A-38-7","t":"A2","s":812,"p":697000,"n":515780,"m":0,"b":"2B2B"},{"l":"C-28-5","t":"A1","s":812,"p":697000,"n":515780,"m":0,"b":"2B2B"},{"l":"C-28-8","t":"A1(M)","s":812,"p":697000,"n":515780,"m":0,"b":"2B2B"},{"l":"A-33A-9","t":"A2(M)","s":812,"p":698000,"n":516520,"m":0,"b":"2B2B"},{"l":"A-39-6","t":"A2(M)","s":812,"p":698000,"n":516520,"m":0,"b":"2B2B"},{"l":"A-39-7","t":"A2","s":812,"p":698000,"n":516520,"m":0,"b":"2B2B"},{"l":"A-43A-6","t":"A2(M)","s":812,"p":698000,"n":516520,"m":0,"b":"2B2B"},{"l":"A-43A-7","t":"A2","s":812,"p":698000,"n":516520,"m":0,"b":"2B2B"},{"l":"C-33A-5","t":"A1","s":812,"p":698000,"n":516520,"m":0,"b":"2B2B"},{"l":"C-33A-8","t":"A1(M)","s":812,"p":698000,"n":516520,"m":0,"b":"2B2B"},{"l":"C-33A-9","t":"A2(M)","s":812,"p":698000,"n":516520,"m":0,"b":"2B2B"},{"l":"A-40-6","t":"A2(M)","s":812,"p":699000,"n":517260,"m":0,"b":"2B2B"},{"l":"A-40-7","t":"A2","s":812,"p":699000,"n":517260,"m":0,"b":"2B2B"},{"l":"C-30-5","t":"A1","s":812,"p":699000,"n":517260,"m":0,"b":"2B2B"},{"l":"C-30-8","t":"A1(M)","s":812,"p":699000,"n":517260,"m":0,"b":"2B2B"},{"l":"A-31-9","t":"A2(M)","s":812,"p":700000,"n":518000,"m":0,"b":"2B2B"},{"l":"A-41-6","t":"A2(M)","s":812,"p":700000,"n":518000,"m":0,"b":"2B2B"},{"l":"A-41-7","t":"A2","s":812,"p":700000,"n":518000,"m":0,"b":"2B2B"},{"l":"B-33A-5","t":"A1","s":812,"p":700000,"n":518000,"m":0,"b":"2B2B"},{"l":"B-33A-8","t":"A1(M)","s":812,"p":700000,"n":518000,"m":0,"b":"2B2B"},{"l":"C-31-8","t":"A1(M)","s":812,"p":700000,"n":518000,"m":0,"b":"2B2B"},{"l":"C-31-9","t":"A2(M)","s":812,"p":700000,"n":518000,"m":0,"b":"2B2B"},{"l":"A-32-7","t":"A2(M)","s":812,"p":701000,"n":518740,"m":0,"b":"2B2B"},{"l":"A-42-6","t":"A2(M)","s":812,"p":701000,"n":518740,"m":0,"b":"2B2B"},{"l":"A-42-7","t":"A2","s":812,"p":701000,"n":518740,"m":0,"b":"2B2B"},{"l":"B-30-5","t":"A1","s":812,"p":701000,"n":518740,"m":0,"b":"2B2B"},{"l":"C-32-6","t":"A1(M)","s":812,"p":701000,"n":518740,"m":0,"b":"2B2B"},{"l":"C-32-7","t":"A2(M)","s":812,"p":701000,"n":518740,"m":0,"b":"2B2B"},{"l":"A-43-6","t":"A2(M)","s":812,"p":702000,"n":519480,"m":0,"b":"2B2B"},{"l":"A-43-7","t":"A2","s":812,"p":702000,"n":519480,"m":0,"b":"2B2B"},{"l":"C-33-5","t":"A1","s":812,"p":702000,"n":519480,"m":0,"b":"2B2B"},{"l":"C-33-8","t":"A1(M)","s":812,"p":702000,"n":519480,"m":0,"b":"2B2B"},{"l":"C-33-9","t":"A2(M)","s":812,"p":702000,"n":519480,"m":0,"b":"2B2B"},{"l":"A-45-6","t":"A2(M)","s":812,"p":704000,"n":520960,"m":0,"b":"2B2B"},{"l":"A-45-7","t":"A2","s":812,"p":704000,"n":520960,"m":0,"b":"2B2B"},{"l":"B-33-5","t":"A1","s":812,"p":704000,"n":520960,"m":0,"b":"2B2B"},{"l":"C-35-5","t":"A1","s":812,"p":704000,"n":520960,"m":0,"b":"2B2B"},{"l":"C-35-8","t":"A1(M)","s":812,"p":704000,"n":520960,"m":0,"b":"2B2B"},{"l":"C-35-9","t":"A2(M)","s":812,"p":704000,"n":520960,"m":0,"b":"2B2B"},{"l":"A-36-9","t":"A2(M)","s":812,"p":705000,"n":521700,"m":0,"b":"2B2B"},{"l":"A-46-6","t":"A2(M)","s":812,"p":705000,"n":521700,"m":0,"b":"2B2B"},{"l":"A-46-7","t":"A2","s":812,"p":705000,"n":521700,"m":0,"b":"2B2B"},{"l":"C-36-5","t":"A1","s":812,"p":705000,"n":521700,"m":0,"b":"2B2B"},{"l":"C-36-8","t":"A1(M)","s":812,"p":705000,"n":521700,"m":0,"b":"2B2B"},{"l":"C-36-9","t":"A2(M)","s":812,"p":705000,"n":521700,"m":0,"b":"2B2B"},{"l":"A-37-9","t":"A2(M)","s":812,"p":706000,"n":522440,"m":0,"b":"2B2B"},{"l":"B-35-5","t":"A1","s":812,"p":706000,"n":522440,"m":0,"b":"2B2B"},{"l":"C-27-3A","t":"A2","s":812,"p":706000,"n":522440,"m":0,"b":"2B2B"}],"estee":[{"l":"D-10-01","t":"C","s":888,"p":1039000,"n":581840,"m":25560,"b":"2+1 BR 2 Bath"},{"l":"D-10-03A","t":"C1","s":888,"p":1039000,"n":581840,"m":25560,"b":"2+1 BR 2 Bath"},{"l":"D-11-01","t":"C","s":888,"p":1042000,"n":583520,"m":25680,"b":"2+1 BR 2 Bath"},{"l":"D-11-03A","t":"C1","s":888,"p":1042000,"n":583520,"m":25680,"b":"2+1 BR 2 Bath"},{"l":"D-13-03A","t":"C1","s":888,"p":1048000,"n":586880,"m":25920,"b":"2+1 BR 2 Bath"},{"l":"D-13A-01","t":"C","s":888,"p":1050000,"n":588000,"m":26000,"b":"2+1 BR 2 Bath"},{"l":"D-13A-03A","t":"C1","s":888,"p":1050000,"n":588000,"m":26000,"b":"2+1 BR 2 Bath"},{"l":"D-15-01","t":"C","s":888,"p":1053000,"n":589680,"m":26120,"b":"2+1 BR 2 Bath"},{"l":"D-19-03A","t":"C1","s":888,"p":1064000,"n":595840,"m":26560,"b":"2+1 BR 2 Bath"},{"l":"D-21-03A","t":"C1","s":888,"p":1069000,"n":598640,"m":26760,"b":"2+1 BR 2 Bath"},{"l":"D-22-01","t":"C","s":888,"p":1072000,"n":600320,"m":26880,"b":"2+1 BR 2 Bath"},{"l":"D-22-03A","t":"C1","s":888,"p":1072000,"n":600320,"m":26880,"b":"2+1 BR 2 Bath"},{"l":"D-23-01","t":"C","s":888,"p":1075000,"n":602000,"m":27000,"b":"2+1 BR 2 Bath"},{"l":"D-23-03A","t":"C1","s":888,"p":1075000,"n":602000,"m":27000,"b":"2+1 BR 2 Bath"},{"l":"D-23A-01","t":"C","s":888,"p":1077000,"n":603120,"m":27080,"b":"2+1 BR 2 Bath"},{"l":"D-23A-03A","t":"C1","s":888,"p":1077000,"n":603120,"m":27080,"b":"2+1 BR 2 Bath"},{"l":"D-25-03A","t":"C1","s":888,"p":1080000,"n":604800,"m":27200,"b":"2+1 BR 2 Bath"},{"l":"D-26-03A","t":"C1","s":888,"p":1082000,"n":605920,"m":27280,"b":"2+1 BR 2 Bath"},{"l":"D-27-03A","t":"C1","s":888,"p":1086000,"n":608160,"m":27440,"b":"2+1 BR 2 Bath"},{"l":"D-29-01","t":"C","s":888,"p":1091000,"n":610960,"m":27640,"b":"2+1 BR 2 Bath"},{"l":"D-29-03A","t":"C1","s":888,"p":1091000,"n":610960,"m":27640,"b":"2+1 BR 2 Bath"},{"l":"D-30-01","t":"C","s":888,"p":1093000,"n":612080,"m":27720,"b":"2+1 BR 2 Bath"},{"l":"D-30-03A","t":"C1","s":888,"p":1093000,"n":612080,"m":27720,"b":"2+1 BR 2 Bath"},{"l":"D-31-01","t":"C","s":888,"p":1098000,"n":614880,"m":27920,"b":"2+1 BR 2 Bath"},{"l":"D-31-03A","t":"C1","s":888,"p":1098000,"n":614880,"m":27920,"b":"2+1 BR 2 Bath"},{"l":"D-32-03A","t":"C1","s":888,"p":1102000,"n":617120,"m":28080,"b":"2+1 BR 2 Bath"},{"l":"D-28-03A","t":"C1","s":888,"p":1115000,"n":624400,"m":28600,"b":"2+1 BR 2 Bath"},{"l":"D-23-02","t":"B","s":735,"p":941000,"n":526960,"m":22230,"b":"2 BR 2 Bath"},{"l":"D-32-02","t":"B","s":735,"p":967000,"n":541520,"m":23010,"b":"2 BR 2 Bath"},{"l":"D-32-06","t":"B1","s":735,"p":931000,"n":521360,"m":21930,"b":"2 BR 2 Bath"},{"l":"D-33A-02","t":"B","s":735,"p":973000,"n":544880,"m":23190,"b":"2 BR 2 Bath"},{"l":"D-33A-06","t":"B1","s":735,"p":937000,"n":524720,"m":22110,"b":"2 BR 2 Bath"},{"l":"D-37-02","t":"B","s":735,"p":982000,"n":549920,"m":23460,"b":"2 BR 2 Bath"},{"l":"D-37-06","t":"B1","s":735,"p":946000,"n":529760,"m":22380,"b":"2 BR 2 Bath"},{"l":"D-39-02","t":"B","s":735,"p":988000,"n":553280,"m":23640,"b":"2 BR 2 Bath"},{"l":"D-41-02","t":"B","s":735,"p":994000,"n":556640,"m":23820,"b":"2 BR 2 Bath"},{"l":"D-06-03","t":"A","s":560,"p":802000,"n":449120,"m":18060,"b":"1 BR 1 Bath"},{"l":"D-08-03","t":"A","s":560,"p":820000,"n":459200,"m":18600,"b":"1 BR 1 Bath"},{"l":"D-13-03","t":"A","s":560,"p":820000,"n":459200,"m":18600,"b":"1 BR 1 Bath"},{"l":"D-16-03","t":"A","s":560,"p":828000,"n":463680,"m":18840,"b":"1 BR 1 Bath"},{"l":"D-19-03","t":"A","s":560,"p":836000,"n":468160,"m":19080,"b":"1 BR 1 Bath"},{"l":"D-21-03","t":"A","s":560,"p":840000,"n":470400,"m":19200,"b":"1 BR 1 Bath"},{"l":"D-23-03","t":"A","s":560,"p":845000,"n":473200,"m":19350,"b":"1 BR 1 Bath"},{"l":"D-23A-03","t":"A","s":560,"p":848000,"n":474880,"m":19440,"b":"1 BR 1 Bath"},{"l":"D-28-03","t":"A","s":560,"p":883000,"n":494480,"m":20490,"b":"1 BR 1 Bath"},{"l":"D-29-03","t":"A","s":560,"p":861000,"n":482160,"m":19830,"b":"1 BR 1 Bath"},{"l":"D-32-03","t":"A","s":560,"p":870000,"n":487200,"m":20100,"b":"1 BR 1 Bath"},{"l":"D-33A-03","t":"A","s":560,"p":878000,"n":491680,"m":20340,"b":"1 BR 1 Bath"},{"l":"D-38-03","t":"A","s":560,"p":938000,"n":525280,"m":22140,"b":"1 BR 1 Bath"},{"l":"D-10-02","t":"B","s":735,"p":905000,"n":506800,"m":21150,"b":"2 BR 2 Bath"},{"l":"D-19-02","t":"B","s":735,"p":929000,"n":520240,"m":21870,"b":"2 BR 2 Bath"},{"l":"D-29-02","t":"B","s":735,"p":959000,"n":537040,"m":22770,"b":"2 BR 2 Bath"},{"l":"D-29-06","t":"B1","s":735,"p":922000,"n":516320,"m":21660,"b":"2 BR 2 Bath"},{"l":"D-06-01","t":"C","s":888,"p":1028000,"n":575680,"m":25120,"b":"2+1 BR 2 Bath"},{"l":"D-07-01","t":"C","s":888,"p":1031000,"n":577360,"m":25240,"b":"2+1 BR 2 Bath"},{"l":"D-12-01","t":"C","s":888,"p":1044000,"n":584640,"m":25760,"b":"2+1 BR 2 Bath"},{"l":"D-06-03A","t":"C1","s":888,"p":1028000,"n":575680,"m":25120,"b":"2+1 BR 2 Bath"},{"l":"D-07-03A","t":"C1","s":888,"p":1031000,"n":577360,"m":25240,"b":"2+1 BR 2 Bath"},{"l":"D-08-03A","t":"C1","s":888,"p":1048000,"n":586880,"m":25920,"b":"2+1 BR 2 Bath"},{"l":"D-09-03A","t":"C1","s":888,"p":1037000,"n":580720,"m":25480,"b":"2+1 BR 2 Bath"},{"l":"D-12-03A","t":"C1","s":888,"p":1044000,"n":584640,"m":25760,"b":"2+1 BR 2 Bath"}],"dora":[{"l":"D-12-11","t":"Type C3","s":721,"p":1000000,"n":576800,"b":"B4-61 & B4-162","m":24000,"mf":80000},{"l":"D-16-09","t":"Type C3","s":721,"p":1005000,"n":576800,"b":"B3-71 & B3-18","m":24200,"mf":80400},{"l":"D-18-01","t":"Type A-1","s":560,"p":707000,"n":448000,"b":"No carpark","m":12280,"mf":56560},{"l":"D-18-03A","t":"Type A-1","s":560,"p":707000,"n":448000,"b":"No carpark","m":12280,"mf":56560},{"l":"D-18-07","t":"Type A-1","s":560,"p":707000,"n":448000,"b":"No carpark","m":12280,"mf":56560},{"l":"D-18-10","t":"Type E1","s":571,"p":803000,"n":456800,"b":"B3-278","m":16120,"mf":64240},{"l":"D-20-02","t":"Type A-1","s":560,"p":709000,"n":448000,"b":"B3-157","m":12360,"mf":56720},{"l":"D-20-10","t":"Type E1","s":571,"p":806000,"n":456800,"b":"B3-196","m":16240,"mf":64480},{"l":"D-20-12","t":"Type C3","s":721,"p":1010000,"n":576800,"b":"B3-70 & B3-19","m":24400,"mf":80800},{"l":"D-20-13","t":"Type C3","s":721,"p":1010000,"n":576800,"b":"B3-149 & B3-128","m":24400,"mf":80800},{"l":"D-20-17","t":"Type C1-1","s":667,"p":936000,"n":533600,"b":"B4-372","m":21440,"mf":74880},{"l":"D-22-11","t":"Type C2","s":689,"p":969000,"n":551200,"b":"B4-170 & B4-157","m":22760,"mf":77520},{"l":"D-22-12","t":"Type C2","s":689,"p":969000,"n":551200,"b":"B3-320 & B3-340","m":22760,"mf":77520},{"l":"D-11-11","t":"Type C2","s":689,"p":955000,"n":551200,"b":"B4-63","m":22200,"mf":76400},{"l":"D-11-12","t":"Type C2","s":689,"p":955000,"n":551200,"b":"B3-100","m":22200,"mf":76400},{"l":"D-11-13","t":"Type C2","s":689,"p":955000,"n":551200,"b":"B3-99","m":22200,"mf":76400},{"l":"D-11-13A","t":"Type C2","s":689,"p":955000,"n":551200,"b":"B3-98","m":22200,"mf":76400},{"l":"D-11-15","t":"Type C2","s":689,"p":955000,"n":551200,"b":"B3-208","m":22200,"mf":76400},{"l":"D-11-16","t":"Type C2","s":689,"p":955000,"n":551200,"b":"B3-224","m":22200,"mf":76400},{"l":"D-12-13A","t":"Type C2","s":689,"p":956000,"n":551200,"b":"B3-221","m":22240,"mf":76480},{"l":"D-12-15","t":"Type C2","s":689,"p":956000,"n":551200,"b":"B3-220","m":22240,"mf":76480},{"l":"D-13-13A","t":"Type C2","s":689,"p":957000,"n":551200,"b":"B3-212","m":22280,"mf":76560},{"l":"D-13-15","t":"Type C2","s":689,"p":957000,"n":551200,"b":"B3-213","m":22280,"mf":76560},{"l":"D-13-16","t":"Type C2","s":689,"p":957000,"n":551200,"b":"B3-214","m":22280,"mf":76560},{"l":"D-13A-15","t":"Type C2","s":689,"p":959000,"n":551200,"b":"B3-353","m":22360,"mf":76720},{"l":"D-13A-16","t":"Type C2","s":689,"p":959000,"n":551200,"b":"B3-352","m":22360,"mf":76720},{"l":"D-15-05","t":"Type C2","s":689,"p":960000,"n":551200,"b":"B3-360","m":22400,"mf":76800},{"l":"D-15-06","t":"Type C2","s":689,"p":960000,"n":551200,"b":"B3-361","m":22400,"mf":76800},{"l":"D-15-07","t":"Type C2","s":689,"p":960000,"n":551200,"b":"B3-362","m":22400,"mf":76800},{"l":"D-15-08","t":"Type C2","s":689,"p":960000,"n":551200,"b":"B3-363","m":22400,"mf":76800},{"l":"D-15-09","t":"Type C2","s":689,"p":960000,"n":551200,"b":"B3-364","m":22400,"mf":76800},{"l":"D-15-10","t":"Type C2","s":689,"p":960000,"n":551200,"b":"B3-365","m":22400,"mf":76800},{"l":"D-15-11","t":"Type C1-1","s":667,"p":930000,"n":533600,"b":"B4-250","m":21200,"mf":74400},{"l":"D-16-10","t":"Type C2","s":689,"p":961000,"n":551200,"b":"B3-192","m":22440,"mf":76880},{"l":"D-16-11","t":"Type C2","s":689,"p":961000,"n":551200,"b":"B4-72","m":22440,"mf":76880},{"l":"D-16-12","t":"Type C2","s":689,"p":961000,"n":551200,"b":"B3-241","m":22440,"mf":76880},{"l":"D-16-13","t":"Type C1-1","s":667,"p":931000,"n":533600,"b":"B4-255","m":21240,"mf":74480},{"l":"D-18-11","t":"Type C2","s":689,"p":964000,"n":551200,"b":"B3-82 & B3-7","m":22560,"mf":77120},{"l":"D-18-13","t":"Type C2","s":689,"p":964000,"n":551200,"b":"B3-78 & B3-11","m":22560,"mf":77120},{"l":"D-18-13A","t":"Type C2","s":689,"p":964000,"n":551200,"b":"B3-77 & B3-12","m":22560,"mf":77120},{"l":"D-18-17","t":"Type C1-1","s":667,"p":934000,"n":533600,"b":"B4-166","m":21360,"mf":74720},{"l":"D-19-03","t":"Type A-1","s":560,"p":708000,"n":448000,"b":"B4-285","m":12320,"mf":56640},{"l":"D-19-07","t":"Type A-1","s":560,"p":708000,"n":448000,"b":"No carpark","m":12320,"mf":56640},{"l":"D-21-07","t":"Type A-1","s":560,"p":710000,"n":448000,"b":"B4-232","m":12400,"mf":56800},{"l":"D-22-03","t":"Type A-1","s":560,"p":712000,"n":448000,"b":"B4-233","m":12480,"mf":56960},{"l":"D-22-05","t":"Type A-1","s":560,"p":712000,"n":448000,"b":"B4-332","m":12480,"mf":56960},{"l":"D-22-07","t":"Type A-1","s":560,"p":712000,"n":448000,"b":"B4-353","m":12480,"mf":56960}],"uju7":[{"l":"B-13A-07","t":"A2","b":"1BR 1B","s":710,"p":515950,"n":355000,"m":0},{"l":"B-22-07","t":"A2","b":"1BR 1B","s":710,"p":529570,"n":355000,"m":0},{"l":"B-23-07","t":"A2","b":"1BR 1B","s":710,"p":531270,"n":355000,"m":0},{"l":"B-27-07","t":"A2","b":"1BR 1B","s":710,"p":538080,"n":355000,"m":0},{"l":"B-29-07","t":"A2","b":"1BR 1B","s":710,"p":541480,"n":355000,"m":0},{"l":"B-30-07","t":"A2","b":"1BR 1B","s":710,"p":543190,"n":355000,"m":0},{"l":"B-33A-10","t":"A","b":"1BR 1B","s":710,"p":550000,"n":355000,"m":0},{"l":"B-37-10","t":"A","b":"1BR 1B","s":710,"p":555110,"n":355000,"m":0},{"l":"B-38-10","t":"A","b":"1BR 1B","s":710,"p":562480,"n":355000,"m":0},{"l":"A-02-11","t":"Ba","b":"2B 2B","s":893,"p":633380,"n":401850,"m":0},{"l":"A-03-11","t":"Ba","b":"2B 2B","s":893,"p":635080,"n":401850,"m":0},{"l":"A-03-12","t":"B","b":"2B 2B","s":893,"p":635080,"n":401850,"m":0},{"l":"A-3A-3A","t":"B","b":"2B 2B","s":893,"p":636780,"n":401850,"m":0},{"l":"A-3A-06","t":"Ba","b":"2B 2B","s":893,"p":636780,"n":401850,"m":0},{"l":"A-3A-12","t":"B","b":"2B 2B","s":893,"p":636780,"n":401850,"m":0},{"l":"A-05-12","t":"B","b":"2B 2B","s":893,"p":638480,"n":401850,"m":0},{"l":"A-23A-11","t":"Ba","b":"2B 2B","s":893,"p":693530,"n":401850,"m":0},{"l":"B-3A-12","t":"Ba","b":"2B 2B","s":893,"p":626640,"n":401850,"m":0},{"l":"B-07-3A","t":"Ba","b":"2B 2B","s":893,"p":631760,"n":401850,"m":0},{"l":"B-09-3A","t":"Ba","b":"2B 2B","s":893,"p":635160,"n":401850,"m":0},{"l":"B-10-3A","t":"Ba","b":"2B 2B","s":893,"p":636870,"n":401850,"m":0},{"l":"B-10-06","t":"B","b":"2B 2B","s":893,"p":636870,"n":401850,"m":0},{"l":"B-11-3A","t":"Ba","b":"2B 2B","s":893,"p":638560,"n":401850,"m":0},{"l":"B-11-06","t":"B","b":"2B 2B","s":893,"p":638560,"n":401850,"m":0},{"l":"B-12-3A","t":"Ba","b":"2B 2B","s":893,"p":640270,"n":401850,"m":0},{"l":"B-13-3A","t":"Ba","b":"2B 2B","s":893,"p":641970,"n":401850,"m":0},{"l":"B-23A-3A","t":"Ba","b":"2B 2B","s":893,"p":683390,"n":401850,"m":0},{"l":"B-23A-06","t":"B","b":"2B 2B","s":893,"p":683390,"n":401850,"m":0},{"l":"B-25-3A","t":"Ba","b":"2B 2B","s":893,"p":685090,"n":401850,"m":0},{"l":"B-26-3A","t":"Ba","b":"2B 2B","s":893,"p":686790,"n":401850,"m":0},{"l":"B-27-3A","t":"Ba","b":"2B 2B","s":893,"p":688500,"n":401850,"m":0},{"l":"B-29-3A","t":"Ba","b":"2B 2B","s":893,"p":691900,"n":401850,"m":0},{"l":"B-29-06","t":"B","b":"2B 2B","s":893,"p":691900,"n":401850,"m":0},{"l":"B-30-3A","t":"Ba","b":"2B 2B","s":893,"p":693610,"n":401850,"m":0},{"l":"B-30-06","t":"B","b":"2B 2B","s":893,"p":693610,"n":401850,"m":0},{"l":"B-31-3A","t":"Ba","b":"2B 2B","s":893,"p":695300,"n":401850,"m":0},{"l":"B-31-06","t":"B","b":"2B 2B","s":893,"p":695300,"n":401850,"m":0},{"l":"B-32-3A","t":"Ba","b":"2B 2B","s":893,"p":697010,"n":401850,"m":0},{"l":"B-32-06","t":"B","b":"2B 2B","s":893,"p":697010,"n":401850,"m":0},{"l":"B-33-3A","t":"Ba","b":"2B 2B","s":893,"p":698710,"n":401850,"m":0},{"l":"B-33-06","t":"B","b":"2B 2B","s":893,"p":698710,"n":401850,"m":0},{"l":"B-33A-3A","t":"Ba","b":"2B 2B","s":893,"p":700410,"n":401850,"m":0},{"l":"B-33A-12","t":"Ba","b":"2B 2B","s":893,"p":700410,"n":401850,"m":0},{"l":"A-02-03","t":"B1a","b":"2B 2B","s":926,"p":656780,"n":416700,"m":0},{"l":"A-3A-03","t":"B1a","b":"2B 2B","s":926,"p":660190,"n":416700,"m":0},{"l":"B-09-03","t":"B1","b":"2B 2B","s":926,"p":658190,"n":416700,"m":0},{"l":"B-23A-03","t":"B1","b":"2B 2B","s":926,"p":706420,"n":416700,"m":0},{"l":"B-30-03","t":"B1","b":"2B 2B","s":926,"p":716640,"n":416700,"m":0},{"l":"B-31-03","t":"B1","b":"2B 2B","s":926,"p":718330,"n":416700,"m":0},{"l":"B-32-03","t":"B1","b":"2B 2B","s":926,"p":720040,"n":416700,"m":0},{"l":"B-33A-03","t":"B1","b":"2B 2B","s":926,"p":723440,"n":416700,"m":0},{"l":"B-13A-02","t":"D1a","b":"3+1B 2B","s":1270,"p":889650,"n":584200,"m":0},{"l":"B-23A-02","t":"D1a","b":"3+1B 2B","s":1270,"p":906680,"n":584200,"m":0},{"l":"B-25-02","t":"D1a","b":"3+1B 2B","s":1270,"p":908370,"n":584200,"m":0},{"l":"B-26-02","t":"D1a","b":"3+1B 2B","s":1270,"p":910080,"n":584200,"m":0},{"l":"B-27-02","t":"D1a","b":"3+1B 2B","s":1270,"p":911780,"n":584200,"m":0},{"l":"B-29-02","t":"D1a","b":"3+1B 2B","s":1270,"p":915180,"n":584200,"m":0},{"l":"B-29-08","t":"D1","b":"3+1B 2B","s":1270,"p":917450,"n":584200,"m":0},{"l":"B-30-08","t":"D1","b":"3+1B 2B","s":1270,"p":919160,"n":584200,"m":0},{"l":"B-31-02","t":"D1a","b":"3+1B 2B","s":1270,"p":918580,"n":584200,"m":0},{"l":"B-31-08","t":"D1","b":"3+1B 2B","s":1270,"p":920860,"n":584200,"m":0},{"l":"B-32-08","t":"D1","b":"3+1B 2B","s":1270,"p":922560,"n":584200,"m":0},{"l":"B-33-02","t":"D1a","b":"3+1B 2B","s":1270,"p":922000,"n":584200,"m":0},{"l":"B-33A-02","t":"D1a","b":"3+1B 2B","s":1270,"p":923700,"n":584200,"m":0},{"l":"A-02-05","t":"Da","b":"3+1B 2B","s":1302,"p":901840,"n":598920,"m":0},{"l":"A-03-05","t":"Da","b":"3+1B 2B","s":1302,"p":903550,"n":598920,"m":0},{"l":"A-03-08","t":"D2","b":"3+1B 2B","s":1302,"p":909210,"n":598920,"m":0},{"l":"A-3A-05","t":"Da","b":"3+1B 2B","s":1302,"p":905240,"n":598920,"m":0},{"l":"A-05-05","t":"Da","b":"3+1B 2B","s":1302,"p":906950,"n":598920,"m":0},{"l":"B-12-05","t":"D","b":"3+1B 2B","s":1302,"p":904080,"n":598920,"m":0},{"l":"B-13-05","t":"D","b":"3+1B 2B","s":1302,"p":905790,"n":598920,"m":0},{"l":"B-13A-05","t":"D","b":"3+1B 2B","s":1302,"p":907500,"n":598920,"m":0},{"l":"B-15-05","t":"D","b":"3+1B 2B","s":1302,"p":909190,"n":598920,"m":0},{"l":"B-16-05","t":"D","b":"3+1B 2B","s":1302,"p":910900,"n":598920,"m":0},{"l":"B-17-05","t":"D","b":"3+1B 2B","s":1302,"p":912600,"n":598920,"m":0},{"l":"B-21-05","t":"D","b":"3+1B 2B","s":1302,"p":919400,"n":598920,"m":0},{"l":"B-23-05","t":"D","b":"3+1B 2B","s":1302,"p":922810,"n":598920,"m":0},{"l":"B-25-05","t":"D","b":"3+1B 2B","s":1302,"p":926210,"n":598920,"m":0},{"l":"B-27-05","t":"D","b":"3+1B 2B","s":1302,"p":929620,"n":598920,"m":0},{"l":"B-29-05","t":"D","b":"3+1B 2B","s":1302,"p":933030,"n":598920,"m":0},{"l":"B-30-05","t":"D","b":"3+1B 2B","s":1302,"p":934720,"n":598920,"m":0},{"l":"B-31-05","t":"D","b":"3+1B 2B","s":1302,"p":936430,"n":598920,"m":0},{"l":"B-32-05","t":"D","b":"3+1B 2B","s":1302,"p":938130,"n":598920,"m":0},{"l":"B-33-05","t":"D","b":"3+1B 2B","s":1302,"p":939840,"n":598920,"m":0},{"l":"B-33A-05","t":"D","b":"3+1B 2B","s":1302,"p":941530,"n":598920,"m":0},{"l":"A-03-09","t":"Ea","b":"4B 3B (Dual Key)","s":1442,"p":995570,"n":749840,"m":0},{"l":"A-3A-09","t":"Ea","b":"4B 3B (Dual Key)","s":1442,"p":997260,"n":749840,"m":0},{"l":"A-05-09","t":"Ea","b":"4B 3B (Dual Key)","s":1442,"p":998970,"n":749840,"m":0},{"l":"B-02-09","t":"E","b":"4B 3B (Dual Key)","s":1442,"p":977500,"n":749840,"m":0},{"l":"B-3A-09","t":"E","b":"4B 3B (Dual Key)","s":1442,"p":980900,"n":749840,"m":0},{"l":"B-06-09","t":"E","b":"4B 3B (Dual Key)","s":1442,"p":984310,"n":749840,"m":0},{"l":"B-08-09","t":"E","b":"4B 3B (Dual Key)","s":1442,"p":993390,"n":749840,"m":0},{"l":"B-10-09","t":"E","b":"4B 3B (Dual Key)","s":1442,"p":991110,"n":749840,"m":0},{"l":"B-13A-09","t":"E","b":"4B 3B (Dual Key)","s":1442,"p":997920,"n":749840,"m":0},{"l":"B-15-09","t":"E","b":"4B 3B (Dual Key)","s":1442,"p":999630,"n":749840,"m":0},{"l":"B-25-09","t":"E","b":"4B 3B (Dual Key)","s":1442,"p":1016650,"n":749840,"m":0},{"l":"B-27-09","t":"E","b":"4B 3B (Dual Key)","s":1442,"p":1020060,"n":749840,"m":0},{"l":"B-29-09","t":"E","b":"4B 3B (Dual Key)","s":1442,"p":1023460,"n":749840,"m":0},{"l":"B-32-09","t":"E","b":"4B 3B (Dual Key)","s":1442,"p":1028560,"n":749840,"m":0},{"l":"B-33A-09","t":"E","b":"4B 3B (Dual Key)","s":1442,"p":1031970,"n":749840,"m":0}],"dcitrine":[{"l":"C3A-2-D2A","t":"C1","b":"3Br + 3Bath w/ terrace & garden","s":1388,"p":771940,"n":463164,"m":0},{"l":"C3A-6-D4A","t":"E1","b":"2Br + 2Bath w/ terrace & garden","s":1468,"p":762840,"n":457704,"m":0},{"l":"C5-6-D6","t":"F","b":"3Br + 3Bath w/bal","s":1420,"p":791440,"n":474864,"m":0},{"l":"C5-5-D5","t":"F","b":"3Br + 3Bath w/bal","s":1420,"p":796640,"n":477984,"m":0},{"l":"C6-5-D3","t":"E","b":"3Br + 3Bath w/bal","s":1582,"p":800540,"n":480324,"m":0},{"l":"C7-5-D3","t":"E","b":"3Br + 3Bath w/bal","s":1582,"p":801840,"n":481104,"m":0},{"l":"C7-3-D2","t":"C","b":"3Br + 3Bath w/bal","s":1496,"p":755040,"n":453024,"m":0},{"l":"C9-5-D3","t":"E","b":"3Br + 3Bath w/bal","s":1582,"p":805740,"n":483444,"m":0},{"l":"C9-3A-D1","t":"D","b":"3Br + 3Bath w/bal","s":1593,"p":805740,"n":483444,"m":0},{"l":"C-9-3-D2","t":"C","b":"3Br + 3Bath w/bal","s":1496,"p":757640,"n":454584,"m":0},{"l":"C11-5-D5","t":"F","b":"3Br + 3Bath w/bal","s":1420,"p":804440,"n":482664,"m":0},{"l":"C11-3A-D1","t":"D","b":"3Br + 3Bath w/bal","s":1593,"p":808340,"n":485004,"m":0},{"l":"C13-5-D3","t":"E","b":"3Br + 3Bath w/bal","s":1582,"p":810940,"n":486564,"m":0},{"l":"C13-3A-D1","t":"D","b":"3Br + 3Bath w/bal","s":1593,"p":810940,"n":486564,"m":0},{"l":"A2-1-2","t":"B","b":"3Br + 2Bath w/ bal","s":1249,"p":636740,"n":382044,"m":0},{"l":"A2-2-2","t":"B","b":"3Br + 2Bath w/ bal","s":1249,"p":636740,"n":382044,"m":0},{"l":"A3-1-2","t":"B","b":"3Br + 2Bath w/ bal","s":1249,"p":636740,"n":382044,"m":0},{"l":"A3-2-2","t":"B","b":"3Br + 2Bath w/ bal","s":1249,"p":636740,"n":382044,"m":0},{"l":"A2-1-3","t":"C","b":"3Br + 3Bath w/ bal","s":1292,"p":649740,"n":389844,"m":0},{"l":"A2-2-3","t":"C","b":"3Br + 3Bath w/ bal","s":1292,"p":649740,"n":389844,"m":0},{"l":"A3-1-3","t":"C","b":"3Br + 3Bath w/ bal","s":1292,"p":649740,"n":389844,"m":0},{"l":"A3-2-3","t":"C","b":"3Br + 3Bath w/ bal","s":1292,"p":649740,"n":389844,"m":0},{"l":"B1-1-2","t":"B","b":"3Br + 2Bath w/ bal","s":1249,"p":644540,"n":386724,"m":0},{"l":"B1-2-2","t":"B","b":"3Br + 2Bath w/ bal","s":1249,"p":636740,"n":382044,"m":0},{"l":"B2-1-2","t":"B","b":"3Br + 2Bath w/ bal","s":1249,"p":636740,"n":382044,"m":0},{"l":"B2-2-2","t":"B","b":"3Br + 2Bath w/ bal","s":1249,"p":636740,"n":382044,"m":0},{"l":"B1-1-3","t":"C","b":"3Br + 3Bath w/ bal","s":1292,"p":657540,"n":394524,"m":0},{"l":"B1-2-3","t":"C","b":"3Br + 3Bath w/ bal","s":1292,"p":649740,"n":389844,"m":0},{"l":"B2-1-3","t":"C","b":"3Br + 3Bath w/ bal","s":1292,"p":649740,"n":389844,"m":0},{"l":"B2-2-3","t":"C","b":"3Br + 3Bath w/ bal","s":1292,"p":649740,"n":389844,"m":0}],"livista":[{"l":"A-08-03A","t":"B1","b":"3BR","s":1012,"p":900680,"n":637560,"m":0},{"l":"B-07-03","t":"B1","b":"3BR","s":1012,"p":900680,"n":637560,"m":0},{"l":"B-07-3A","t":"B1","b":"3BR","s":1012,"p":900680,"n":637560,"m":0},{"l":"B-07-10","t":"B1","b":"3BR","s":1012,"p":900680,"n":637560,"m":0},{"l":"B-09-3A","t":"B1","b":"3BR","s":1012,"p":900680,"n":637560,"m":0},{"l":"B-10-3A","t":"B1","b":"3BR","s":1012,"p":900680,"n":637560,"m":0},{"l":"B-13A-3A","t":"B1","b":"3BR","s":1012,"p":900680,"n":637560,"m":0},{"l":"B-13A-10","t":"B1","b":"3BR","s":1012,"p":900680,"n":637560,"m":0},{"l":"B-16-03","t":"B1","b":"3BR","s":1012,"p":900680,"n":637560,"m":0},{"l":"A-07-02","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"A-08-02","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"A-09-02","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"A-10-02","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"A-11-02","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"A-12-02","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"A-13-02","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"A-13A-02","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"A-15-02","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"A-16-01","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"A-16-02","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"A-18-02","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"A-18-12","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"A-20-02","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"A-21-02","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"A-22-02","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"A-23A-02","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"A-27-02","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"A-33A-12","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"B-07-02","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"B-07-12","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"B-08-01","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"B-08-02","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"B-09-01","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"B-09-02","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"B-10-02","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"B-11-02","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"B-12-01","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"B-12-02","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"B-13-01","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"B-13-02","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"B-13-12","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"B-13A-01","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"B-13A-02","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"B-13A-12","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"B-15-02","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"B-16-02","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"B-17-01","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"B-18-01","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"B-18-02","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"B-22-02","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"B-23A-02","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"B-27-02","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"B-28-01","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"B-30-01","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"B-33A-01","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"B-33A-02","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"B-35-02","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0},{"l":"B-36-01","t":"B2","b":"3BR","s":1035,"p":921150,"n":652050,"m":0}]};
+
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const num = id => { const v = parseFloat($(id).value); return isFinite(v) ? v : 0; };
+  const radio = name => document.querySelector(`input[name="${name}"]:checked`).value;
+  const rm = (n, sign) => { const r = Math.round(n); const s = sign ? (r > 0 ? '+' : r < 0 ? '−' : '') : (r < 0 ? '−' : ''); return `${s}RM ${Math.abs(r).toLocaleString('en-MY')}`; };
+  const rmP = n => { const r = Math.round(n); return r < 0 ? `(RM ${Math.abs(r).toLocaleString('en-MY')})` : `RM ${r.toLocaleString('en-MY')}`; };
+  const rmK = n => { const a = Math.abs(n), s = n < 0 ? '−' : ''; return a >= 1e6 ? `${s}RM ${(a/1e6).toFixed(2).replace(/\.?0+$/,'')}M` : a >= 1e4 ? `${s}RM ${Math.round(a/1000)}k` : `${s}RM ${Math.round(a).toLocaleString('en-MY')}`; };
+  const sum = lines => lines.reduce((a, l) => a + (l[1] || 0), 0);
+  const has = v => v !== null && v !== undefined && v !== '' && isFinite(+v);
+
+  function pmt(P, ratePct, years){ if (P <= 0 || years <= 0) return 0; const i = ratePct/1200, n = years*12; return i === 0 ? P/n : P*i/(1 - Math.pow(1+i, -n)); }
+  function pv(A, ratePct, years){ if (A <= 0 || years <= 0) return 0; const i = ratePct/1200, n = years*12; return i === 0 ? A*n : A*(1 - Math.pow(1+i, -n))/i; }
+  // Malaysian MOT stamp duty scale: 1% / 2% / 3% / 4%
+  function stampDuty(v){ const bands = [[100000,.01],[500000,.02],[1000000,.03],[Infinity,.04]]; let d = 0, prev = 0; for (const [cap, r] of bands) { if (v > prev) d += (Math.min(v, cap) - prev) * r; prev = cap; } return d; }
+
+  const tail = (x, maintMonths, vacancyMonths) => [
+    ['TNB deposit', 1300, 'from personal cash'],
+    ['Water bill deposit', 300, 'from personal cash'],
+    [`${maintMonths} months maintenance deposit`, maintMonths * x.maint, 'from personal cash'],
+    [`${vacancyMonths} months vacancy period`, vacancyMonths * x.inst, 'from personal cash / cash out']
+  ];
+  const pctOfNett = x => ({rent: x.S.arpPct/100 * x.nett / 12, note: `ARP ${x.S.arpPct}% of nett price a year`});
+  function shortTerm(x, night, occs, wifi, share){
+    const occ = occs[x.S.occ], gross = occ * night * 30, util = 10 * occ * 30;
+    const fee = (gross - util - wifi) * share;
+    return {rent: gross - util - wifi - fee, note: `${Math.round(occ*100)}% occupancy × RM${night}/night, less utilities RM${Math.round(util)}, Wi-Fi RM${wifi} and ${share*100}% operator fee RM${Math.round(fee)}`};
+  }
+  const byLayout = (x, dk, mid, r1) => { const b = x.u.b || ''; return b === 'Dual Key' ? dk : (b === '1R' ? r1 : mid); };
+
+  // ---------- Project rules, one per Excel calculator ----------
+  const XL = {
+    laatinn: {
+      name: 'Laatinn', location: 'Damansara Perdana, Selangor', status: 'Under construction · completion July 2027', file: 'LAATINN Excel Calculator V2', commercial: true,
+      lppsa: false, foreign: true, minSalary: 4500, valPsf: 0, booking: 2000, refund: true,
+      maint: x => 0.44 * x.size, maintNote: 'RM0.44 psf',
+      pre: x => [['SPA & loan agreement: legal fee, stamp duty, disbursement', 0, 'bear by developer'], ['MRTT/MRTA (optional)', 0]],
+      construction: x => [['Progress payment interest (estimation @ 1.5%)', 0.015 * x.loan]],
+      variable: x => [
+        [x.S.my ? 'Memorandum of Transfer (MOT)' : 'Memorandum of Transfer (MOT), foreign rate', x.S.my ? (x.u.m || 0) : (x.u.mf || 0), 'bear by purchaser'],
+        ['POT, POC & disbursement', 7000, 'bear by purchaser'],
+        ['Renovation (RM70 psf)', 70 * x.size],
+        ...tail(x, 2, 2)],
+      rents: [
+        {id: 'office-full', kind: 'whole', label: 'Office, fully furnished', fn: x => ({rent: byLayout(x, 2600, 2200, 2100)})},
+        {id: 'office-part', kind: 'whole', label: 'Office, partially furnished', fn: x => ({rent: byLayout(x, 2400, 2000, 1900)})},
+        {id: 'residential', kind: 'whole', label: 'Residential', fn: x => ({rent: byLayout(x, 2600, 2000, 1700)})},
+        {id: 'str', kind: 'str', label: 'Short-term (Airbnb)', fn: x => shortTerm(x, byLayout(x, 340, 220, 200), [.4, .5, .3], 100, .25)}
+      ],
+      tags: ['Cashout', 'Cashflow'],
+      highlights: ['Prime, mature Damansara Perdana township with complete infrastructure', 'Cheapest Damansara mixed development with office and mall', 'LTV70-friendly with six-figure cash out', 'Commercial title, leasehold to 2104; completion July 2027 (not a completed property)']
+    },
+    sabrina: {
+      name: 'Sabrina', location: 'Bayan Lepas, Penang Island', status: 'Under construction · completion 2027', file: 'SABRINA Excel Calculator V4',
+      lppsa: true, foreign: false, minSalary: 4000, valPsf: 0, booking: 2000, refund: true,
+      maint: x => 0.28 * x.size, maintNote: 'RM0.28 psf',
+      pre: x => [['Sale & Purchase Agreement (SPA): legal fees, disbursements, stamp duty & SST', 0, 'bear by developer'], ['Loan Agreement (LA): legal fees, disbursements & SST', 0, 'bear by developer'], ['Valuation fees (0.35% of SPA + SST)', 0.0035 * x.spa * 1.08, 'bear by purchaser']],
+      construction: x => [['Progress payment interest', 0, 'reimbursed by developer']],
+      variable: x => [
+        ['Perfection of Charge (POC): legal fees, disbursement, stamp duty & SST', (1500 + 1000 + 40) * 1.08, 'bear by purchaser'],
+        ['Perfection of Transfer (POT): legal fees, disbursement, stamp duty & SST', (x.spa * 0.02 + 1540) * 1.08, 'bear by purchaser'],
+        ['Renovation (RM20 psf)', 20 * x.size],
+        ...tail(x, 2, 2)],
+      rents: [
+        {id: 'arp', kind: 'arp', label: 'Automated Rental Programme (ARP)', fn: pctOfNett},
+        {id: 'whole', kind: 'whole', label: 'Whole-unit rental', fn: x => ({rent: x.size >= 753 ? 2700 : 2500})}
+      ],
+      tags: ['Capital gain', 'Cashout'],
+      highlights: ['Luxury-spec freehold in prime Penang Island', '22% below market price', 'Interest fully covered until completion (reimbursement)', 'Positive cashflow potential with Multiple Rental Options (MRO)', 'Walking distance to upcoming LRT and Penang’s biggest upcoming mall']
+    },
+    ferra: {
+      name: 'Ferra', location: 'Batu Ferringhi, Penang', status: 'Completed · sold as-is, no DLP', file: 'Ferra Excel Calculator V10',
+      lppsa: false, foreign: true, minSalary: 0, valPsf: 0, booking: 2000, refund: false,
+      maint: x => 349.8, maintNote: 'RM349.80 per unit',
+      pre: x => [
+        ['SPA & loan agreement: legal fees, stamp duty, disbursement', 0, 'bear by developer'],
+        ['Memorandum of Transfer (MOT)', 0, 'bear by developer'],
+        ...(x.S.my ? [] : [['Foreigner portion of MOT', x.u.mf || 0, 'developer capped at Malaysian rate'], ['Foreign state levy (3% of SPA)', 0.03 * x.spa]]),
+        ['POT, POC & state consent application fee', 2000, 'bear by purchaser'],
+        ['Valuation fee (~0.35%)', 0.0035 * x.base]],
+      construction: x => [['Progress payment interest', 0, 'completed project']],
+      variable: x => [['Renovation after FAR Capital discount (RM50 psf)', 50 * x.size], ...tail(x, 4, 3)],
+      rents: [
+        {id: 'arp', kind: 'arp', label: 'Automated Rental Programme (ARP)', fn: x => ({rent: x.u.t === 'A' ? 3500 : 3000})},
+        {id: 'whole', kind: 'whole', label: 'Whole-unit rental', fn: x => ({rent: x.u.t === 'A' ? 4300 : 3800})}
+      ],
+      tags: ['Cashflow'], highlights: []
+    },
+    reva: {
+      name: 'Reva', location: 'Seputeh / Pantai Dalam, KL', status: 'Under construction · completion Q2 2027', file: 'REVA Excel Calculator V2',
+      lppsa: true, foreign: false, bumiOnly: true, minSalary: 0, valPsf: 0, booking: 1000, refund: true,
+      maint: x => 0.35 * x.size, maintNote: 'RM0.35 psf',
+      pre: x => [['SPA: legal fee, disbursement, stamp duty & SST', 0, 'bear by developer'], ['Loan Agreement cum Assignment (LACA): disbursement & stamp duty', 0.005 * x.loan + 1500, 'bear by purchaser'], ['MRTT/MRTA (optional)', 0, 'bear by purchaser']],
+      construction: x => [['Progress payment interest (estimation ~1.5%)', 0.015 * x.loan]],
+      variable: x => [
+        ['Perfection of Charge (POC): legal fees (of loan), disbursement, stamp duty & SST', 0.01 * x.loan * 1.08 + 540, 'bear by purchaser · up to 2 years after VP'],
+        ['Perfection of Transfer (POT): legal fees (of SPA), disbursement, stamp duty & SST', 0.01 * x.base * 1.08 + stampDuty(x.base) + 500, 'bear by purchaser · up to 2 years after VP'],
+        ['Renovation (RM50 psf)', 50 * x.size, 'from personal cash / cash out'],
+        ...tail(x, 2, 2)],
+      rents: [
+        {id: 'arp', kind: 'arp', label: 'Automated Rental Programme (ARP)', fn: pctOfNett},
+        {id: 'whole', kind: 'whole', label: 'Whole-unit rental (current)', fn: x => ({rent: 3200})},
+        {id: 'whole-opt', kind: 'whole', label: 'Whole-unit rental (optimistic)', fn: x => ({rent: 3500})},
+        {id: 'str', kind: 'str', label: 'Short-term (Airbnb)', fn: x => shortTerm(x, 260, [.5, .7, .35], 150, .25)}
+      ],
+      tags: [], highlights: ['Open to Bumiputera buyers only']
+    },
+    estee: {
+      name: 'Estee', location: 'Jalan Ampang, KL', status: 'Completed · CCC 26 Jan 2026', file: 'ESTEE B3 Excel Calculator V2',
+      lppsa: true, foreign: true, minSalary: 6000, valPsf: 0, booking: 500, refund: true,
+      maint: x => 0.35 * x.size, maintNote: 'RM0.35 psf',
+      pre: x => [['SPA & loan agreement: legal fees, stamp duty, disbursement', 0, 'bear by developer'], ['Deed of Assignment (DOA) / LACA', (0.003 * x.loan + 1000) * 1.08], ['MRTT/MRTA (optional)', 0]],
+      construction: x => [['Progress payment interest', 0, 'almost complete']],
+      variable: x => [
+        [x.S.my ? 'POT & disbursement (incl. MOT)' : 'POT & disbursement (incl. MOT at 4% foreign rate)', (x.S.my ? (x.u.m || 0) : 0.04 * x.spa) + 2000 * 1.08, 'bear by purchaser'],
+        ['POC & disbursement', (2500 + 1500) * 1.08, 'bear by purchaser'],
+        ['Renovation (RM55 psf)', 55 * x.size],
+        ...tail(x, 2, 2)],
+      rents: [
+        {id: 'arp', kind: 'arp', label: 'Automated Rental Programme (ARP)', fn: pctOfNett},
+        {id: 'whole', kind: 'whole', label: 'Whole-unit rental', fn: x => ({rent: x.size === 735 ? 3100 : x.size === 560 ? 2300 : 3500})},
+        {id: 'coliving', kind: 'whole', label: 'Co-living (rooms)', fn: x => {
+          const income = 950 + 850 + 800 + (x.size === 888 ? 650 : 0) + 300;
+          const costs = income * 0.12 + 120 + 150 + 200;
+          return {rent: income - costs, note: `Rooms + 2 car parks RM${income}, less 12% management, system fee, Wi-Fi and cleaning RM${Math.round(costs)}`};
+        }},
+        {id: 'str', kind: 'str', label: 'Short-term (Airbnb)', fn: x => shortTerm(x, x.size === 735 ? 200 : x.size === 560 ? 180 : 230, [.55, .7, .4], 150, .25)}
+      ],
+      tags: ['Cashout'],
+      highlights: ['Under 4 km to KLCC financial district', 'Prime location with massive cashback for debt consolidation', 'Luxury, resort-style facilities']
+    }
+  };
+
+  XL.dora = {
+    name: 'Dora', location: 'Sri Hartamas, KL', status: 'Completed 2019', file: 'DORA Excel Calculator Batch 3 V3',
+    lppsa: false, foreign: true, minSalary: 6000, valPsf: 0, booking: 2000, refund: true,
+    maint: x => 0.44 * x.size, maintNote: 'RM0.44 psf',
+    pre: x => [['SPA & loan agreement: legal fee, stamp duty, disbursement', 0, 'bear by developer'], ['Valuation fee', 2000, 'bear by purchaser'], ['MRTT/MRTA (optional)', 0]],
+    construction: x => [['Progress payment interest', 0, 'completed project']],
+    variable: x => [
+      ['Malaysian Memorandum of Transfer (MOT)', x.S.my ? (x.u.m || 0) : 0, 'bear by purchaser'],
+      ...(x.S.my ? [] : [['Foreigner portion of MOT', x.u.mf || 0, 'bear by purchaser, title not ready'], ['State consent application fee', 3996, 'bear by purchaser'], ['State consent approval fee / levy', x.spa <= 1000000 ? 20000 : 0.02 * x.spa, 'bear by purchaser']]),
+      ['POT, POC & disbursement', 0, 'bear by purchaser'],
+      ['Renovation (estimation)', 42000],
+      ...tail(x, 3, 3)],
+    rents: [
+      {id: 'whole', kind: 'whole', label: 'Whole-unit rental', fn: x => ({rent: x.size < 600 ? 2800 : x.size > 700 ? 3300 : 3200})},
+      {id: 'str', kind: 'str', label: 'Short-term (Airbnb)', fn: x => shortTerm(x, x.size < 600 ? 320 : x.size > 700 ? 400 : 380, [.45, .6, .35], 100, .25)}
+    ],
+    tags: ['Cashout', 'Cashflow'],
+    highlights: ['Cheapest new completed property in Sri Hartamas, Mont Kiara & Dutamas', 'Branded suite 15% below Sri Hartamas median', 'Luxury spec with Multiple Rental Options (MRO)', 'Close to KL Metropolis mega project']
+  };
+
+  // Finalised price lists (no project calculator yet): prices from the list, legal costs and rent estimated
+  const listing = o => ({
+    lppsa: true, foreign: true, minSalary: 0, valPsf: 0, booking: 1000, refund: true, listing: true,
+    maint: x => x.S.listMaintPsf * x.size, maintNote: 'estimate per psf',
+    pre: x => [['SPA legal fees', 0, 'per legal fees breakdown, pending legal review'], ['Loan agreement stamp duty & disbursement (estimate: 0.5% of loan + RM1,500)', 0.005 * x.loan + 1500, 'bear by purchaser']],
+    construction: x => [['Progress payment interest (estimate ~1.5% of loan)', 0.015 * x.loan]],
+    variable: x => [
+      ...(x.u.m ? [['Memorandum of Transfer (MOT)', x.u.m, 'per price list']] : []),
+      ['Perfection of Charge (POC) (estimate)', 0.01 * x.loan * 1.08 + 540, 'bear by purchaser'],
+      ['Perfection of Transfer (POT) incl. MOT stamp duty (estimate)', 0.01 * x.spa * 1.08 + stampDuty(x.spa) + 500, 'bear by purchaser'],
+      [`Renovation (estimate RM${x.S.listRenoPsf} psf)`, x.S.listRenoPsf * x.size],
+      ...tail(x, 2, 2)],
+    rents: [
+      {id: 'yield', kind: 'whole', label: 'Estimated rent (yield on SPA)', fn: x => ({rent: x.S.rentYield / 100 * x.spa / 12, note: `${x.S.rentYield}% gross yield on SPA price; the price list has no rental data`})},
+      {id: 'arp', kind: 'arp', label: 'ARP on nett price', fn: pctOfNett}
+    ],
+    tags: [], ...o
+  });
+  XL.uju7 = listing({name: 'Fujii', location: '', status: 'Under construction · completion 2027', file: 'Fujii price list (18/09/26)',
+    highlights: ['Leasehold, completion 2027, bare unit with AC piping', 'Average 35.5% rebate from SPA; nett from RM355,000', 'Offer period 4 Sep 2026 to 3 Mar 2027 (+3 months extension)', 'Booking fee RM1,000 payable to FAR Capital']});
+  XL.dcitrine = listing({name: "D'Citrine (Batch 2)", location: '', status: 'Under construction · completion 2027', file: "D'Citrine (Batch 2) Finalised Listings 18/09/26",
+    highlights: ['Freehold, completion 2027, bare unit', '40% rebate from SPA; nett from RM382,044', 'Booking fee RM1,000 payable to FAR Capital']});
+  XL.livista = listing({name: 'Damansara Livista', location: 'Damansara', status: 'Under construction · completion 2027', file: 'Damansara Livista Finalised Listings 18/09/26', refund: false,
+    highlights: ['Freehold, completion 2027, semi-furnished (kitchen cabinet, hood & hob, air-conditioners)', '29% rebate from SPA; nett from RM637,560', 'Offer period 11 Sep 2026 to 31 Dec 2026 (+3 months extension)', 'Booking fee RM1,000 payable to developer']});
+
+  // Projects without a calculator: deal-sheet figures + standard cost estimates
+  const sheetRent = (cf, nett) => Math.round(cf + pmt(nett, 3.7, 35));
+  const deal = o => ({spa: o.val, co90: null, co70: null, coLppsa: null, minSalary: 0, tags: [], highlights: [], lppsa: false, ...o, rent: o.rent ?? sheetRent(o.sheetCf, o.nett)});
+  const DEFAULT_LIB = [];  // deal-sheet projects (none at the moment; add them in the Deal-sheet projects card)
+  const GEN = {
+    booking: 1000, refund: true,
+    maint: x => x.S.genMaint, maintNote: 'estimate',
+    pre: x => [['Loan agreement stamp duty & disbursement (estimate: 0.5% of loan + RM1,500)', 0.005 * x.loan + 1500, 'bear by purchaser']],
+    construction: x => [[x.uc ? 'Progress payment interest (estimate ~1.5%)' : 'Progress payment interest', x.uc ? 0.015 * x.loan : 0, x.uc ? '' : 'completed project']],
+    variable: x => [
+      ['Perfection of Charge (POC) (estimate)', 0.01 * x.loan * 1.08 + 540, 'bear by purchaser'],
+      ['Perfection of Transfer (POT) incl. MOT stamp duty (estimate)', 0.01 * x.spa * 1.08 + stampDuty(x.spa) + 500, 'bear by purchaser'],
+      ['Renovation (estimate)', x.S.genReno],
+      ...tail(x, 2, 2)],
+    rents: [
+      {id: 'sheet', kind: 'whole', label: 'Expected rent (deal sheet)', fn: x => ({rent: +x.p.rent || 0})},
+      {id: 'arp', kind: 'arp', label: 'ARP on nett price', fn: pctOfNett}
+    ]
+  };
+
+  const STAGES = [
+    {from: 21, to: 35, name: 'Stage 1 · Foundation', goal: 'No bad debt · RM50k savings · RM1M portfolio'},
+    {from: 36, to: 45, name: 'Stage 2 · Expansion & family', goal: 'RM100k savings · RM2-3M portfolio'},
+    {from: 46, to: 55, name: 'Stage 3 · Wealth consolidation', goal: 'RM15k-30k passive income · RM5-6M'},
+    {from: 56, to: 65, name: 'Stage 4 · Financial freedom', goal: 'Secure retirement · legacy'}
+  ];
+  const STAGE_INFO = {
+    1: {title: 'Stage 1 · Immediate goals', planTag: 'Properties with at least RM50k cash out each, to clear bad debt and build savings.',
+        focus: ['Clear all bad debt (car, credit card, personal loan)', 'Savings of at least RM50k (6 to 12 months of expenses)', 'Cover short-term needs: car, wedding, renovation', 'Strategy: buy properties with minimum RM50k cash out, under construction or completed']},
+    2: {title: 'Stage 2 · Medium-term goals', planTag: '90% loans for cash out and capital gain, 70% loans to build cashflow.',
+        focus: ['Savings above RM100k', 'Property portfolio of RM2–3M, balancing cashflow and capital gain', 'Maximise cash out on 90% loans', 'Use 70% loans to build cashflow']},
+    3: {title: 'Stage 3 · Long-term wealth', planTag: 'Rental yield first: completed, cashflow-positive properties for retirement income.',
+        focus: ['Retirement income of RM15k–30k a month', 'Net worth of RM6M', 'Enough for children\'s education and retirement', 'Sell 1, Free 3 over 20 years: 4 units → RM15k/month, 8 → RM30k, 13 → RM50k']}
+  };
+  const LS_KEY = 'prp-library-v7';
+  let library = DEFAULT_LIB.map(o => ({...o}));
+  try { const saved = JSON.parse(localStorage.getItem(LS_KEY)); if (Array.isArray(saved) && saved.length) library = saved; } catch (e) {}
+  const saveLib = () => { try { localStorage.setItem(LS_KEY, JSON.stringify(library)); } catch (e) {} };
+
+  const locks = {};      // pid -> listing id chosen by consultant
+  const rentPicks = {};  // pid -> rent option id
+  let selectedKind = null;
+  let openProj = null;   // project row opened under 'Every project, side by side'
+  let lastPicked = null;
+
+  function readState(){
+    const S = {
+      clientName: $('clientName').value.trim(), age: num('age'), nat: radio('nat'), bumiSel: radio('bumi'), emp: radio('emp'), mode: radio('eligMode'),
+      elig: Math.min(5000000, num('elig')), eligTyped: num('elig'), income: num('income'), commit: num('commit'), lppsaElig: num('lppsaElig'),
+      existing: Math.max(0, Math.floor(num('existing'))), cash: num('cash'),
+      stageSel: $('stageSel').value,
+      maxUnits: Math.min(5, Math.max(1, Math.floor(num('maxUnits')) || 1)),
+      sellOn: $('sellOn').checked, sellValue: num('sellValue'), sellLoan: num('sellLoan'), sellInst: num('sellInst'), sellCost: num('sellCost'),
+      growth: num('growth'), horizon: Math.max(1, Math.min(30, num('horizon') || 10)), rate: num('rate'), lppsaRate: num('lppsaRate'), strategy: $('rentStrategy').value, arpPct: +$('arpPct').value, occ: +radio('occ'),
+      instBasis: radio('instBasis'), inclVar: $('inclVar').checked, genMaint: num('genMaint'), genReno: num('genReno'),
+      rentYield: num('rentYield'), listRenoPsf: num('listRenoPsf'), listMaintPsf: num('listMaintPsf'),
+      debtPL: num('debtPL'), debtCC: num('debtCC'), debtCar: num('debtCar'),
+      goalCash: num('goalCash'), goalCf: num('goalCf'),
+      dsr: num('dsr'), fxMin: num('fxMin'), ageCap: num('ageCap') || 70, maxTenure: num('maxTenure') || 35
+    };
+    S.my = S.nat === 'my';
+    S.bumi = S.my && S.bumiSel === 'yes';
+    S.gov = S.my && S.emp === 'gov';
+    S.debt = S.debtPL + S.debtCC + S.debtCar;
+    S.tenure = Math.max(5, Math.min(S.maxTenure, S.ageCap - S.age));
+    S.tenureCapped = S.ageCap - S.age < S.maxTenure;
+    const freed = S.sellOn ? S.sellInst : 0;
+    if (S.mode === 'income') { S.maxInst = Math.max(0, S.income * S.dsr/100 - S.commit + freed); S.bankElig = pv(S.maxInst, S.rate, S.tenure); }
+    else S.bankElig = S.elig + pv(freed, S.rate, S.tenure);
+    S.eligCapped = S.bankElig > 5000000 || S.eligTyped > 5000000;
+    S.bankElig = Math.min(5000000, S.bankElig);   // planner caps bank eligibility at RM5m
+    if (!S.gov) S.lppsaElig = 0;
+    // Government servant with both eligibilities: one LPPSA purchase runs alongside the bank purchases
+    S.dualBuy = S.gov && S.lppsaElig > 0 && S.bankElig > 0;
+    S.saleCash = S.sellOn ? Math.max(0, S.sellValue * (1 - S.sellCost/100) - S.sellLoan) : 0;
+    S.cashAvail = S.cash + S.saleCash;
+    S.loansAfterSale = Math.max(0, S.existing - (S.sellOn && S.existing > 0 ? 1 : 0));
+    S.slots90 = S.my ? Math.max(0, 2 - S.loansAfterSale) : 0;
+    S.maxPlan = S.dualBuy ? Math.max(2, S.maxUnits) : S.maxUnits;   // room for the LPPSA unit plus a bank unit
+    // Roadmap (FAR Capital journey): Stage 1 clear bad debt + RM50k savings + RM1M portfolio, Stage 2 RM100k savings, Stage 3 rental yield
+    S.sav1 = 50000;
+    S.efGap = Math.max(0, S.sav1 - S.cash);                    // top-up to the RM50k emergency fund
+    S.cashGoal = Math.max(S.debt, S.goalCash);                 // bad debts always have to come out
+    S.need1 = S.cashGoal;
+    S.stageAuto = (S.debt > 0 || S.cash < S.sav1) ? 1 : S.age >= 46 ? 3 : S.slots90 === 0 ? 2 : 1;
+    S.stage = S.stageSel === 'auto' ? S.stageAuto : +S.stageSel;
+    S.goal = 'both'; S.coBasis = 'ncu'; S.targetCf = 0; S.targetCo = 0; S.minCo = 0;
+    return S;
+  }
+
+  // ---------- Listings: every buyable unit ----------
+  function listings(){
+    const out = [];
+    for (const pid in XL) for (const u of UNITS[pid] || []) out.push({id: `${pid}:${u.l}`, pid, src: 'xl', def: XL[pid], u});
+    for (const p of library) if (+p.nett > 0) out.push({id: p.id, pid: (p.project || p.id).trim().toLowerCase(), src: 'sheet', def: GEN, p});
+    return out;
+  }
+  const nameOf = L => L.src === 'xl' ? L.def.name : L.p.project;
+  const statusOf = L => L.src === 'xl' ? L.def.status : L.p.status;
+  const locationOf = L => L.src === 'xl' ? L.def.location : L.p.location;
+  const lppsaOk = L => L.src === 'xl' ? L.def.lppsa : !!L.p.lppsa;
+  // LPPSA can only be recommended on an under-construction property
+  const lppsaUnit = L => lppsaOk(L) && /under|uc/i.test(statusOf(L) || '');
+  const unitLabel = L => L.src === 'xl' ? `${L.u.l} · ${L.u.b || L.u.t} · ${L.u.s} sf` : (L.p.variant || 'Deal sheet');
+  const priceOf = (L, S) => {
+    if (L.src !== 'xl') return {spa: +L.p.spa || +L.p.val, nett: +L.p.nett};
+    const bumi = S.bumi && L.u.pb;
+    return {spa: bumi ? L.u.pb : L.u.p, nett: bumi ? L.u.nb : L.u.n};
+  };
+
+  function blockReason(L, S){
+    const {spa} = priceOf(L, S);
+    if (L.src === 'xl' && L.def.bumiOnly && !S.bumi) return 'Bumiputera buyers only';
+    if (L.src === 'xl' && !L.def.foreign && !S.my) return 'Malaysian buyers only';
+    if (!S.my && Math.max(spa, +(L.p && L.p.val) || 0) < S.fxMin) return 'below foreign-buyer minimum';
+    const minSal = L.src === 'xl' ? L.def.minSalary : +L.p.minSalary;
+    if (minSal > 0 && S.income > 0 && S.income < minSal) return `needs ${rm(minSal)} salary`;
+    return '';
+  }
+
+  function rentOption(L, S){
+    const opts = L.def.rents;
+    const pick = rentPicks[L.pid] && opts.find(o => o.id === rentPicks[L.pid]);
+    if (pick) return pick;
+    if (S.strategy !== 'default') { const m = opts.find(o => o.kind === S.strategy); if (m) return m; }
+    return opts[0];
+  }
+
+  // Full calculation for one unit and one financing type, mirroring the Excel calculators
+  function compute(L, type, S){
+    const def = L.def;
+    // Commercial property: not part of the residential loan quota, margin up to 85%
+    if (def.commercial && S.my && type !== 'lppsa') type = 'b85';
+    // Foreign buyers: up to 80% margin, no residential quota
+    else if (!S.my && type !== 'lppsa') type = 'bfx';
+    const {spa, nett} = priceOf(L, S);
+    const size = L.src === 'xl' ? L.u.s : 0;
+    let base, loan, fromSheet = false;
+    if (L.src === 'xl') base = def.valPsf ? Math.min(spa, def.valPsf * size) : spa;
+    else base = Math.min(spa || +L.p.val, +L.p.val || spa);
+    const ltv = type === 'lppsa' ? 1 : type === 'b90' ? .9 : type === 'b85' ? .85 : type === 'bfx' ? .8 : .7;
+    if (type === 'lppsa') base = Math.min(L.src === 'xl' ? spa : base, 750000);
+    const sheetCo = L.src === 'sheet' ? (type === 'lppsa' ? L.p.coLppsa : type === 'b90' ? L.p.co90 : L.p.co70) : null;
+    if (has(sheetCo)) { loan = nett + +sheetCo; fromSheet = true; } else loan = base * ltv;
+    const rate = type === 'lppsa' ? S.lppsaRate : S.rate;
+    const x = {S, L, u: L.u, p: L.p, pid: L.pid, def, name: nameOf(L), spa, nett, size, base, loan, ltv, type, rate, fromSheet, uc: /under|uc/i.test(statusOf(L) || '')};
+    // Commercial loans run 25 years at most, LPPSA 30 years at most
+    x.tenure = def.commercial ? Math.min(S.tenure, 25) : type === 'lppsa' ? Math.min(S.tenure, 30) : S.tenure;
+    x.inst = pmt(S.instBasis === 'nett' ? nett : loan, rate, x.tenure);
+    x.maint = def.maint(x);
+    const ro = rentOption(L, S); const r = ro.fn(x);
+    x.rentOpt = ro; x.rent = r.rent; x.rentNote = r.note || '';
+    x.cf = x.rent - x.inst - x.maint;
+    x.cfIO = x.rent - loan * rate / 1200 - x.maint;
+    x.cashout = loan - nett;
+    x.pre = def.pre(x); x.cons = def.construction(x);
+    x.preTotal = def.booking + sum(x.pre);
+    x.consTotal = sum(x.cons);
+    x.fixed = x.preTotal + x.consTotal;
+    x.refund = def.refund ? def.booking : 0;
+    x.received = x.cashout + x.refund;
+    x.ncu = x.fixed - x.received;
+    x.var = def.variable(x); x.varTotal = sum(x.var);
+    return x;
+  }
+
+  // ---------- Plan search ----------
+  function coMetric(p, S){ return S.coBasis === 'gross' ? p.cashout : S.coBasis === 'all' ? -(p.ncu + p.varTotal) : -p.ncu; }
+  const coLabel = S => S.coBasis === 'gross' ? 'Cash out' : S.coBasis === 'all' ? 'Cash after all costs' : 'Cash after fixed costs';
+  function meets(p, S){
+    // No lump-sum targets any more: the roadmap sets the goals, alternatives are ranked
+    if (!S.targetCf && !S.targetCo) return true;
+    const a = p.cf >= S.targetCf - .5, b = coMetric(p, S) >= S.targetCo - .5; return S.goal === 'cf' ? a : S.goal === 'co' ? b : a && b; }
+  function progress(p, S){
+    const f = S.targetCf > 0 ? Math.min(p.cf / S.targetCf, 1) : (p.cf >= 0 ? 1 : 0);
+    const c = S.targetCo > 0 ? Math.min(coMetric(p, S) / S.targetCo, 1) : (coMetric(p, S) >= 0 ? 1 : 0);
+    return S.goal === 'cf' ? f : S.goal === 'co' ? c : (f + c) / 2;
+  }
+  function primary(p, S){
+    if (S.goal === 'cf') return p.cf;
+    if (S.goal === 'co') return coMetric(p, S);
+    return p.cf / Math.max(S.targetCf, 100) + coMetric(p, S) / Math.max(S.targetCo, 10000);
+  }
+  function topList(cmp, K){
+    const arr = [];
+    return {arr, push(p){
+      if (arr.length >= K && cmp(p, arr[arr.length-1]) >= 0) return;
+      let i = arr.length; arr.push(p);
+      while (i > 0 && cmp(arr[i], arr[i-1]) < 0) { const t = arr[i]; arr[i] = arr[i-1]; arr[i-1] = t; i--; }
+      if (arr.length > K) arr.pop();
+    }};
+  }
+  const COMBOS = {};
+  function combosIdx(n, k){
+    const key = n + ':' + k; if (COMBOS[key]) return COMBOS[key];
+    const out = [];
+    (function rec(s, pick){ if (pick.length === k) { out.push(pick.slice()); return; } for (let i = s; i < n; i++) { pick.push(i); rec(i+1, pick); pick.pop(); } })(0, []);
+    return COMBOS[key] = out;
+  }
+
+  function search(S){
+    const all = listings();
+    const groups = new Map();
+    for (const L of all) { if (blockReason(L, S)) continue; if (!groups.has(L.pid)) groups.set(L.pid, []); groups.get(L.pid).push(L); }
+    const t0 = S.my ? 'b90' : 'b70';
+    const repsPer = S.maxUnits <= 3 ? 3 : 2;
+    const P = [];
+    for (const [pid, ls] of groups) {
+      let reps;
+      const locked = locks[pid] && ls.find(L => L.id === locks[pid]);
+      if (locked) reps = [locked];
+      else {
+        const ev = ls.map(L => ({L, x: compute(L, t0, S)}));
+        const ev70 = ls.map(L => ({L, x: compute(L, 'b70', S)}));
+        const pickBy = (f, e) => (e || ev).reduce((a, b) => f(b.x) > f(a.x) ? b : a).L;
+        reps = [...new Set([pickBy(x => -x.ncu), pickBy(x => x.cf), pickBy(x => -x.loan), pickBy(x => -x.ncu, ev70)])].slice(0, repsPer + 1);
+      }
+      P.push({pid, reps: reps.map(L => {
+        const F = {b90: compute(L, 'b90', S), b70: compute(L, 'b70', S)};
+        if (S.gov && lppsaUnit(L)) F.lppsa = compute(L, 'lppsa', S);
+        return {L, pid, F, lppsa: !!F.lppsa, commercial: !!(L.src === 'xl' && L.def.commercial)};
+      })});
+    }
+
+    const K = 60;
+    const lists = {
+      lean: topList((a, b) => a.items.length - b.items.length || primary(b, S) - primary(a, S), K),
+      cf: topList((a, b) => b.cf - a.cf || a.items.length - b.items.length, K),
+      co: topList((a, b) => coMetric(b, S) - coMetric(a, S) || b.cf - a.cf, K),
+      near: topList((a, b) => progress(b, S) - progress(a, S) || a.items.length - b.items.length || primary(b, S) - primary(a, S), K)
+    };
+    let feasible = 0, hits = 0;
+    const set = [];
+    const evaluate = () => {
+      const n = set.length;
+      const lpOpts = [-1];
+      if (S.gov && S.lppsaElig > 0) set.forEach((r, i) => { if (r.lppsa) lpOpts.push(i); });
+      for (const lp of lpOpts) {
+        const bank = []; for (let i = 0; i < n; i++) if (i !== lp && !(set[i].commercial && S.my)) bank.push(i);
+        // Try every number of 90% loans, not just the maximum: a smaller margin can be the only one that fits
+        for (let k = Math.min(S.slots90, bank.length); k >= 0; k--)
+        for (const hiIdx of combosIdx(bank.length, k)) {
+          const types = new Array(n).fill('b70');
+          if (lp >= 0) types[lp] = 'lppsa';
+          hiIdx.forEach(j => { types[bank[j]] = 'b90'; });
+          let bankLoan = 0, lppsaLoan = 0, cf = 0, cfIO = 0, cashout = 0, received = 0, fixed = 0, upfront = 0, ncu = 0, varTotal = 0, rent = 0, inst = 0, value = 0;
+          const items = new Array(n);
+          for (let i = 0; i < n; i++) {
+            const x = set[i].F[types[i]]; items[i] = x;
+            if (types[i] === 'lppsa') lppsaLoan += x.loan; else bankLoan += x.loan;
+            cf += x.cf; cfIO += x.cfIO; cashout += x.cashout; received += x.received; fixed += x.fixed; upfront += x.preTotal;
+            ncu += x.ncu; varTotal += x.varTotal; rent += x.rent; inst += x.inst; value += x.spa;
+          }
+          if (S.minCo && items.some(x => x.cashout < S.minCo)) continue;
+          if (bankLoan > S.bankElig + 1 || lppsaLoan > S.lppsaElig + 1) continue;
+          if (upfront > S.cashAvail + 1 || ncu > S.cashAvail + 1) continue;
+          if (S.inclVar && ncu + varTotal > S.cashAvail + 1) continue;
+          feasible++;
+          const p = {items, bankLoan, lppsaLoan, cf, cfIO, cashout, received, fixed, upfront, ncu, varTotal, rent, inst, value,
+            setKey: set.map(r => r.pid).sort().join('|')};
+          if (meets(p, S)) { hits++; lists.lean.push(p); lists.cf.push(p); lists.co.push(p); }
+          lists.near.push(p);
+        }
+      }
+    };
+    (function rec(start){
+      for (let j = start; j < P.length; j++) for (const r of P[j].reps) {
+        set.push(r); evaluate();
+        if (set.length < S.maxUnits) rec(j + 1);
+        set.pop();
+      }
+    })(0);
+    return {lists, feasible, hits};
+  }
+
+  function makePlan(items){
+    const p = {items, bankLoan: 0, lppsaLoan: 0, cf: 0, cfIO: 0, cashout: 0, received: 0, fixed: 0, upfront: 0, ncu: 0, varTotal: 0, rent: 0, inst: 0, value: 0};
+    for (const x of items) {
+      if (x.type === 'lppsa') p.lppsaLoan += x.loan; else p.bankLoan += x.loan;
+      p.cf += x.cf; p.cfIO += x.cfIO; p.cashout += x.cashout; p.received += x.received; p.fixed += x.fixed; p.upfront += x.preTotal;
+      p.ncu += x.ncu; p.varTotal += x.varTotal; p.rent += x.rent; p.inst += x.inst; p.value += x.spa;
+    }
+    p.setKey = items.map(x => x.pid).sort().join('|');
+    return p;
+  }
+
+  // Roadmap plan: properties bought in stage order, whatever the project.
+  // Stage 1: at least RM50k cash out each. Property 1 must give enough cash back to clear the bad debt.
+  //          Goes on until debt is cleared, savings reach RM50k and the portfolio reaches RM1M.
+  // Stage 2: balance cash out and cashflow until savings reach RM100k.
+  // Stage 3: rental yield, cashflow-positive units only (completed ones preferred).
+  function roadmapPlan(S){
+    const all = listings().filter(L => !blockReason(L, S));
+    const pids = [...new Set(all.map(L => L.pid))];
+    const items = [], used = new Set(), info = {stageEnds: {}, debtCovered: S.debt <= 0, noCover: null, stoppedAt: null};
+    let res90 = S.slots90, lppsaLeft = S.gov && S.lppsaElig > 0, stage = S.stage;
+    const fitsFor = cur => x => {
+      const bank = cur.bankLoan + (x.type === 'lppsa' ? 0 : x.loan), lp = cur.lppsaLoan + (x.type === 'lppsa' ? x.loan : 0);
+      const ncu = cur.ncu + x.ncu, up = cur.upfront + x.preTotal, vr = cur.varTotal + x.varTotal;
+      return bank <= S.bankElig + 1 && lp <= S.lppsaElig + 1 && up <= S.cashAvail + 1 && ncu <= S.cashAvail + 1 && (!S.inclVar || ncu + vr <= S.cashAvail + 1);
+    };
+    const candidates = (cur, onlyType) => {
+      const fits = fitsFor(cur), out = [];
+      let types = res90 > 0 ? ['b90', 'b70'] : ['b70'];   // 70% stays open: a smaller loan may be the only one that fits
+      if (lppsaLeft) types.push('lppsa');
+      if (onlyType) types = types.filter(t => t === onlyType);
+      for (const pid of pids) {
+        if (used.has(pid)) continue;
+        const ls = all.filter(L => L.pid === pid);
+        const locked = locks[pid] && ls.find(L => L.id === locks[pid]);
+        for (const t of types) for (const L of (locked ? [locked] : ls)) {
+          if (t === 'lppsa' && !lppsaUnit(L)) continue;
+          const x = compute(L, t, S);
+          if (fits(x)) out.push(x);
+        }
+      }
+      // The 90% quota is only two purchases, so spend it first. 70% is the fallback when no 90% unit fits.
+      if (res90 > 0 && out.some(x => x.type === 'b90' || x.type === 'b85')) return out.filter(x => x.type !== 'b70');
+      return out;
+    };
+    const best = (xs, f) => xs.reduce((a, b) => f(b) > f(a) ? b : a);
+    const savings = cur => S.cash - S.debt - cur.ncu;   // cash on hand after clearing debt and fixed costs
+    while (items.length < S.maxPlan && stage <= 3) {
+      const cur = makePlan(items);
+      const inStage = items.filter(x => x.stage === stage).length;
+      if (stage === 1 && items.length && -cur.ncu >= S.need1 && cur.value >= 1000000) { info.stageEnds[1] = items.length; stage = 2; continue; }
+      if (stage === 2 && inStage && savings(cur) >= 100000) { info.stageEnds[2] = items.length; stage = 3; continue; }
+      // The LPPSA purchase runs alongside the bank one: keep the last slot for it while it is still unused
+      const keepLppsa = lppsaLeft && S.lppsaElig > 0 && items.length === S.maxPlan - 1;
+      let xs = candidates(cur, keepLppsa ? 'lppsa' : null);
+      if (keepLppsa && !xs.length) { lppsaLeft = false; info.noLppsaUnit = true; xs = candidates(cur); }
+      let pick = null;
+      if (stage === 1) {
+        let c1 = xs.filter(x => x.cashout >= 50000);
+        if (!items.length && S.debt > 0) {
+          const cover = c1.filter(x => x.cashout >= S.debt);
+          if (cover.length) { c1 = cover; info.debtCovered = true; }
+          else { const top = xs.length ? best(xs, x => x.cashout) : null; info.noCover = top; if (top) { c1 = [top]; } }
+        }
+        if (!c1.length) { info.stageEnds[1] = items.length; stage = 2; continue; }
+        const remaining = S.need1 + cur.ncu;
+        const enough = c1.filter(x => -x.ncu >= remaining);
+        pick = enough.length ? best(enough, x => x.cf) : best(c1, x => -x.ncu);
+      } else if (stage === 2) {
+        if (!xs.length) { info.stoppedAt = 2; break; }
+        pick = best(xs, x => -x.ncu / 100000 + x.cf / 500);
+      } else {
+        const c3 = xs.filter(x => x.cf >= 0);
+        if (!c3.length) { info.stoppedAt = 3; if (items.length) break; if (!xs.length) break; pick = best(xs, x => x.cf); }
+        else pick = best(c3, x => x.cf + (x.uc ? 0 : 150));
+      }
+      items.push({...pick, stage});
+      used.add(pick.pid);
+      if (pick.type === 'b90') res90--;
+      if (pick.type === 'lppsa') lppsaLeft = false;
+    }
+    if (!items.length) return null;
+    const plan = makePlan(items);
+    plan.roadmap = info;
+    return plan;
+  }
+
+
+  function pickPlans(res, S){
+    const reached = res.hits > 0;
+    const meta = {
+      lean: {title: reached ? 'Fewest properties' : 'Closest to goal', tag: reached ? 'Hit the goal with the smallest commitment.' : 'Gets nearest to the target within the limits.'},
+      cf: {title: 'Most passive income', tag: 'Alternative: highest monthly cashflow within this client\'s limits.'},
+      co: {title: 'Most cash out', tag: 'Alternative: largest cash released within this client\'s limits.'}
+    };
+    const pools = reached ? {lean: res.lists.lean.arr, cf: res.lists.cf.arr, co: res.lists.co.arr}
+      : {lean: res.lists.near.arr, cf: res.lists.near.arr.slice().sort((a, b) => b.cf - a.cf), co: res.lists.near.arr.slice().sort((a, b) => coMetric(b, S) - coMetric(a, S))};
+    const chosen = [], used = new Set();
+    const pri = roadmapPlan(S);
+    if (pri) {
+      const st = [...new Set(pri.items.map(x => x.stage))];
+      used.add(pri.setKey);
+      chosen.push({kind: 'pri', plan: pri, title: st.length > 1 ? `Stage ${st[0]} to ${st[st.length-1]} roadmap` : `Stage ${st[0]} roadmap`,
+        tag: 'Bought in stage order: cash out first, then balance, then rental yield.', reached: pri.roadmap.debtCovered, recommended: true});
+    }
+    for (const kind of (pri ? ['cf', 'co'] : ['lean', 'cf', 'co'])) {
+      const pick = pools[kind].find(p => !used.has(p.setKey));
+      if (pick) { used.add(pick.setKey); chosen.push({kind, plan: pick, ...meta[kind], reached: meets(pick, S)}); }
+    }
+    const stage = STAGES.find(s => S.age >= s.from && S.age <= s.to) || STAGES[STAGES.length-1];
+    if (!pri && chosen[0]) chosen[0].recommended = true;
+    return {chosen, reached: reached || (pri && meets(pri, S)), stage};
+  }
+
+  // ---------- Rendering ----------
+  const finLabel = t => t === 'lppsa' ? 'LPPSA 100%' : t === 'b90' ? 'Bank 90%' : t === 'b85' ? 'Bank 85% (commercial)' : t === 'bfx' ? 'Bank 80% (foreign buyer)' : 'Bank 70%';
+  const statusPill = s => /under|uc/i.test(s || '') ? `<span class="pill uc">${esc(s)}</span>` : `<span class="pill done">${esc(s || 'Completed')}</span>`;
+  const signCls = n => n >= 0 ? 'pos' : 'neg';
+  const cfBand = v => v < 0 ? `Negative cashflow (${rm(v)})` : v < 300 ? 'Band RM 0 – 299' : v < 600 ? 'Band RM 300 – 599' : v < 1000 ? 'Band RM 600 – 999' : 'Band RM 1,000 and above';
+  const coBand = v => v < 0 ? `No cash back (${rm(v)})` : v < 50000 ? 'Band RM 0 – below 50k' : v < 100000 ? 'Band RM 50k – below 100k' : v < 150000 ? 'Band RM 100k – below 150k' : 'Band RM 150k and above';
+  const cfGoal = v => v >= 1000 ? 'RM 1,000+' : v >= 600 ? 'RM 600 – 999' : v >= 300 ? 'RM 300 – 599' : 'RM 0 – 299';
+  const coGoal = v => v >= 150000 ? 'RM 150k+' : v >= 100000 ? 'RM 100k – below 150k' : v >= 50000 ? 'RM 50k – below 100k' : 'RM 0 – below 50k';
+
+  function renderStages(S){
+    $('stages').innerHTML = STAGES.map((s, i) => `<div class="stage${i + 1 === S.stage ? ' on' : ''}"><span class="age">AGE ${s.from}-${s.to}</span><b>${s.name}</b><span>${s.goal}</span></div>`).join('');
+  }
+
+  function renderFacts(S){
+    const f = [
+      ['Loan tenure', `${S.tenure} years`, S.tenureCapped ? `Capped so loan ends by age ${S.ageCap}` : 'Maximum allowed'],
+      ['Bank eligibility', rmK(S.bankElig), S.eligCapped ? 'Capped at the RM5m planner maximum' : S.mode === 'income' ? `From ${rm(S.maxInst)}/month capacity` : (S.sellOn ? 'Includes freed instalment' : 'As entered')]
+    ];
+    if (S.gov) f.push(['LPPSA eligibility', rmK(S.lppsaElig), '100% financing, 1 under-construction property, alongside the bank loan']);
+    f.push(['90% purchases left', S.my ? String(S.slots90) : '0', S.my ? (S.slots90 ? '1st & 2nd property 90%, 3rd onwards 70%' : '3rd property onwards: 70% (commercial 85%)') : 'Foreign buyers: 80% max']);
+    f.push(['Cash available', rmK(S.cashAvail), S.saleCash ? `Includes ${rmK(S.saleCash)} from sale` : 'Covers booking & fixed costs']);
+    $('facts').innerHTML = f.map(([l, v, s]) => `<div class="fact"><div class="eyebrow">${l}</div><div class="v num">${v}</div><div class="s">${s}</div></div>`).join('');
+  }
+
+  // 20-year Sell 1, Free 3 outlook (video assumptions: value and rent double, 30-year loan about half paid)
+  function outlook(items){
+    const n = items.length;
+    const sold = n >= 2 ? Math.max(1, Math.round(n / 4)) : 0, kept = n - sold;
+    const byVal = items.slice().sort((a, b) => b.spa - a.spa);
+    const proceeds = byVal.slice(0, sold).reduce((a, x) => a + 2 * x.spa - 0.5 * x.loan, 0);
+    const keptDebt = byVal.slice(sold).reduce((a, x) => a + 0.5 * x.loan, 0);
+    const passive = byVal.slice(sold).reduce((a, x) => a + 2 * x.rent, 0);
+    return {n, sold, kept, passive, value: 2 * items.reduce((a, x) => a + x.spa, 0), paidOff: proceeds >= keptDebt, surplus: proceeds - keptDebt};
+  }
+
+  // Roadmap card: what each stage needs, which properties do the job, and whether the goal is reached
+  function renderStageCard(S, plan){
+    const el = $('stageCard');
+    const items = plan ? plan.items : [];
+    const upTo = n => makePlan(items.slice(0, n));
+    const why = S.stageSel !== 'auto' ? 'Starting stage set by consultant.'
+      : S.stage === 1 ? (S.debt > 0 ? `Starts at Stage 1: ${rm(S.debt)} bad debt to clear.` : S.cash < S.sav1 ? `Starts at Stage 1: savings ${rm(S.cash)} are below RM50k.` : 'Starts at Stage 1: building the first RM1M of property.')
+      : S.stage === 3 ? `Starts at Stage 3: age ${S.age}, time to focus on rental income.`
+      : 'Starts at Stage 2: no bad debt, savings in place and no 90% loans left.';
+    const cols = [1, 2, 3].map(n => {
+      const info = STAGE_INFO[n];
+      const mine = items.map((x, i) => ({x, i})).filter(o => o.x.stage === n);
+      const skipped = n < S.stage;
+      let status, ok;
+      if (skipped) { status = 'Already done before this plan'; ok = true; }
+      else if (!mine.length) { status = 'Not in this plan yet: needs more eligibility or cash, or allow more properties'; ok = false; }
+      else {
+        const p = upTo(mine[mine.length - 1].i + 1), cashIn = -p.ncu, sav = S.cash - S.debt + cashIn;
+        if (n === 1) { ok = cashIn >= S.need1; status = `${rm(cashIn)} in hand after fixed costs${S.need1 > 0 ? `, need ${rm(S.need1)}` : ''}. Portfolio ${rmK(p.value)} of RM1M.`; }
+        else if (n === 2) { ok = sav >= 100000; status = `Savings about ${rmK(sav)} of RM100k. Portfolio ${rmK(p.value)}.`; }
+        else { ok = mine.every(o => o.x.cf >= 0); status = `Cashflow ${rm(mine.reduce((a, o) => a + o.x.cf, 0), true)}/month from Stage 3 units.`; }
+      }
+      return `<div class="rstage${skipped ? ' skip' : ''}">
+        <b>${esc(info.title)}</b>
+        <p class="small">${esc(info.planTag)}</p>
+        <div class="chips">${mine.map(o => `<span class="chip">${o.i + 1}. ${esc(o.x.name)} <i>${o.x.type === 'lppsa' ? 'LPPSA' : Math.round(o.x.ltv*100) + '%'}</i></span>`).join('')}</div>
+        <span class="chip" style="background:${ok ? 'var(--pos-bg)' : 'var(--warn-bg)'}">${ok ? '✓' : '○'} ${esc(status)}</span>
+      </div>`;
+    }).join('');
+    el.innerHTML = `<div class="sectionhead"><div><span class="eyebrow">Roadmap</span><h2>Stage 1, 2, 3 buying order</h2><p>${esc(why)}</p></div></div>
+      <div class="rstages">${cols}</div>`;
+  }
+
+  // Plain-language answer to "how many properties do I need for my target?"
+  // One property type repeated, so it is a guide; the plan above is the exact version.
+  function bestFor(S){
+    const types = [S.slots90 > 0 ? 'b90' : 'b70'];
+    if (S.gov && S.lppsaElig > 0) types.push('lppsa');
+    let cf = null, co = null;
+    for (const L of listings()) {
+      if (blockReason(L, S)) continue;
+      for (const t of types) {
+        if (t === 'lppsa' && !lppsaUnit(L)) continue;
+        const x = compute(L, t, S);
+        if (x.loan > (t === 'lppsa' ? S.lppsaElig : S.bankElig) + 1) continue;
+        if (!cf || x.cf > cf.cf) cf = x;
+        if (!co || -x.ncu > -co.ncu) co = x;
+      }
+    }
+    return {cf, co};
+  }
+
+  function renderTarget(S){
+    const el = $('targetCard');
+    const {cf, co} = bestFor(S);
+    if (!cf && !co) { el.innerHTML = `<div class="sectionhead"><div><span class="eyebrow">Your target</span><h2>How many properties do you need?</h2><p>No property fits this client's eligibility and cash yet.</p></div></div>`; return; }
+    const blocks = [];
+    if (S.cashGoal > 0 || S.goalCf <= 0) {
+      const per = co ? -co.ncu : 0;
+      const need = per > 0 ? Math.ceil(S.cashGoal / per) : 0;
+      const afford = co ? Math.max(1, Math.floor(S.bankElig / co.loan)) : 0;
+      const parts = [S.debt > 0 ? `bad debts ${rm(S.debt)}` : '', S.goalCash > S.debt ? `plans ${rm(S.goalCash - S.debt)}` : ''].filter(Boolean);
+      const line = S.cashGoal <= 0 ? 'No cash target set, so any cash back is a bonus.'
+        : per <= 0 ? 'No property here pays for its own fixed costs, so cash back cannot cover this yet.'
+        : need <= afford ? `<b>${need} ${need === 1 ? 'property' : 'properties'}</b> like this one covers it. Your eligibility allows about ${afford}.`
+        : `Your eligibility allows about <b>${afford}</b> of them, which raises ${rm(afford * per)} of the ${rm(S.cashGoal)}. You would need ${need} in total, so raise eligibility or spread the purchases over time.`;
+      blocks.push({eyebrow: 'Cash in hand', target: rm(S.cashGoal), targetLab: parts.length ? 'For ' + parts.join(' + ') : 'No cash goal set yet',
+        unit: co, per: per, perLab: 'cash in hand per property, after fixed costs', line, stage: 'This is Stage 1 and Stage 2 work: cash out first.'});
+    }
+    if (S.goalCf > 0) {
+      const per = cf ? cf.cf : 0;
+      const need = per > 0 ? Math.ceil(S.goalCf / per) : 0;
+      const afford = cf ? Math.max(1, Math.floor(S.bankElig / cf.loan)) : 0;
+      const line = S.goalCf <= 0 ? 'No cashflow target set.'
+        : per <= 0 ? `No property is cashflow-positive on a ${S.tenure}-year loan at this age and rate. Cashflow comes later, once rents rise and the loans are paid down.`
+        : need <= afford ? `<b>${need} ${need === 1 ? 'property' : 'properties'}</b> like this one gets you there. Your eligibility allows about ${afford}.`
+        : `Your eligibility allows about <b>${afford}</b> of them, which gives ${rm(afford * per)} a month of the ${rm(S.goalCf)} you want. Getting to ${rm(S.goalCf)} needs ${need} properties, so build up over the stages.`;
+      blocks.push({eyebrow: 'Monthly cashflow', target: rm(S.goalCf), targetLab: 'Passive income you want each month',
+        unit: cf, per: per, perLab: 'cashflow per property, per month', line, stage: 'This is Stage 3 work: rental yield, and Sell 1 Free 3 doubles it over 20 years.'});
+    }
+    el.innerHTML = `<div class="sectionhead"><div><span class="eyebrow">Your target</span><h2>How many properties do you need?</h2>
+        <p>A quick guide using the best single property available to this client right now. The recommended plan below is the exact version.</p></div></div>
+      <div class="tgrid">${blocks.map(b => `<div class="tblock">
+        <div class="eyebrow">${esc(b.eyebrow)}</div>
+        <div class="tnum num">${b.target}</div>
+        <div class="small">${esc(b.targetLab)}</div>
+        ${b.unit ? `<div class="tunit"><b>${esc(b.unit.name)}</b> <span class="fin ${b.unit.type === 'lppsa' ? 'lppsa' : ''}">${finLabel(b.unit.type)}</span>
+          <div class="small">${esc(unitLabel(b.unit.L))}</div>
+          <div class="num ${signCls(b.per)}" style="font-weight:700;margin-top:4px">${rm(b.per, true)}<span class="small" style="font-weight:400"> ${esc(b.perLab)}</span></div></div>` : ''}
+        <p class="tline">${b.line}</p>
+        <p class="small" style="margin:0">${esc(b.stage)}</p>
+      </div>`).join('')}</div>
+      <p class="small" style="margin:12px 0 0">Guide only: it repeats one property. From the third residential property the margin drops to 70%, which changes both numbers. Commercial (Laatinn) sits outside that count.</p>`;
+  }
+
+  function renderSell(S){
+    const el = $('sellFlow');
+    el.hidden = !S.sellOn;
+    if (!S.sellOn) return;
+    el.className = 'card';
+    el.innerHTML = `<div class="sectionhead"><div><h2>Sell 1, free 3</h2><p>Restructure existing equity into more income-producing units.</p></div></div>
+      <div class="flow">
+        <div class="box"><span class="eyebrow">Sell</span><b class="num">${rm(S.sellValue)}</b><span class="small">Less ${S.sellCost}% costs</span></div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="box"><span class="eyebrow">Repay loan</span><b class="num">${rm(S.sellLoan)}</b><span class="small">Frees ${rm(S.sellInst)}/month</span></div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="box" style="background:var(--pos-bg)"><span class="eyebrow">Released to reinvest</span><b class="num pos">${rm(S.saleCash)}</b><span class="small">Property count down by 1</span></div>
+      </div>`;
+  }
+
+  function renderPlans(S, picked, res){
+    const box = $('plans'), banner = $('banner');
+    $('resetPicks').hidden = !Object.keys(locks).length && !Object.keys(rentPicks).length;
+    if (!picked.chosen.length) {
+      box.innerHTML = `<div class="card empty" style="grid-column:1/-1">No combination fits yet. Try raising eligibility or cash on hand, allowing more properties, or adding projects.</div>`;
+      banner.innerHTML = `<div class="banner bad"><b>✕</b><p><b>Nothing fits within ${rmK(S.bankElig)} eligibility and ${rmK(S.cashAvail)} cash.</b> Every plan must cover booking fees and fixed costs from cash on hand.</p></div>`;
+      $('detail').innerHTML = '';
+      lastPicked = null;
+      return;
+    }
+    const rp = picked.chosen[0].plan, inHand = -rp.ncu;
+    let ok, msg;
+    const rd = rp.roadmap;
+    if (rd && S.debt > 0) {
+      const first = rp.items[0];
+      ok = rd.debtCovered;
+      msg = ok ? `<b>Property 1, ${esc(first.name)} (${first.type === 'lppsa' ? 'LPPSA' : Math.round(first.ltv*100) + '%'}), gives ${rm(first.cashout)} cash back: enough to clear the ${rm(S.debt)} bad debt.</b> `
+        : `<b>No property within this client's eligibility gives ${rm(S.debt)} cash back to clear the bad debt.</b> The highest is ${esc(first.name)} at ${rm(first.cashout)}, so it goes first. `;
+      msg += `After fixed costs the plan puts ${rm(inHand)} in hand against the Stage 1 need of ${rm(S.need1)} (debt plus savings top-up to RM50k)${inHand >= S.need1 ? (ok ? '.' : ', so the debt is cleared once property 2 is bought.') : `, ${rm(S.need1 - inHand)} short.`}`;
+    } else if (rd) {
+      ok = S.stage > 1 || inHand >= S.need1;
+      msg = S.stage === 1 ? `<b>No bad debt to clear.</b> Stage 1 builds savings to RM50k and the portfolio to RM1M: this plan puts ${rm(inHand)} in hand and buys ${rmK(rp.value)} of property.`
+        : S.stage === 2 ? `<b>Roadmap starts at Stage 2.</b> Savings after fixed costs about ${rmK(S.cash + inHand)} (target RM100k), cashflow ${rm(rp.cf, true)}/month.`
+        : rp.items.every(x => x.cf >= 0) ? `<b>Roadmap starts at Stage 3.</b> Cashflow ${rm(rp.cf, true)}/month from cashflow-positive properties.`
+        : `<b>Roadmap starts at Stage 3, but no property is cashflow-positive on a ${S.tenure}-year loan.</b> The least negative is shown (${rm(rp.cf, true)}/month). Consider more cash upfront or a longer tenure.`;
+      if (S.stage === 3) ok = rp.items.every(x => x.cf >= 0);
+    } else { ok = true; msg = 'Showing the best alternatives within this client\'s limits.'; }
+    banner.innerHTML = `<div class="banner ${ok ? 'ok' : 'warn'}"><b>${ok ? '✓' : '!'}</b><p>${msg}</p></div>`;
+    lastPicked = picked;
+    if (!picked.chosen.some(c => c.kind === selectedKind)) selectedKind = (picked.chosen.find(c => c.recommended) || picked.chosen[0]).kind;
+    $('plansSub').textContent = `Checked ${res.feasible.toLocaleString('en-MY')} combinations that fit this client's loan and cash limits.`;
+    box.innerHTML = picked.chosen.map(c => {
+      const p = c.plan;
+      const used = S.bankElig > 0 ? Math.min(100, p.bankLoan / S.bankElig * 100) : 0;
+      const co = coMetric(p, S);
+      return `<button type="button" class="plan" data-kind="${c.kind}" aria-pressed="${c.kind === selectedKind}">
+        <div class="ptitle"><div><h3>${c.title}</h3><div class="tag">${c.tag}</div></div>${c.recommended ? `<span class="pill rec">Recommended</span>` : ''}${!c.reached ? ' <span class="pill miss">Short</span>' : ''}</div>
+        <div class="big">
+          <div><div class="lab">Cashflow</div><div class="val num ${signCls(p.cf)}">${rm(p.cf, true)}</div><div class="small">per month · ${cfBand(p.cf)}</div></div>
+          <div><div class="lab">${coLabel(S)}</div><div class="val num ${signCls(co)}">${co < 0 ? 'No cash back' : rmK(co)}</div><div class="small">${coBand(co)}</div></div>
+        </div>
+        <div class="chips">${p.items.map(x => `<span class="chip">${x.stage ? `S${x.stage} ` : ''}${esc(x.name)} <i>${x.type === 'lppsa' ? 'LPPSA' : Math.round(x.ltv*100) + '%'}</i></span>`).join('')}</div>
+        <div><div class="meter"><span style="width:${used.toFixed(1)}%"></span></div><div class="meterlab num"><span>Bank loan ${rmK(p.bankLoan)}</span><span>${Math.round(used)}% of eligibility</span></div></div>
+      </button>`;
+    }).join('');
+  }
+
+  const line = (label, val, who, cls) => `<tr class="${cls || ''}${Math.round(val) === 0 && !cls ? ' z' : ''}"><td>${esc(label)}${who ? ` <span class="who">*${esc(who)}*</span>` : ''}</td><td class="num">${Math.round(val) === 0 && !cls ? 'RM –' : rmP(val)}</td></tr>`;
+
+  function breakdownHTML(x){
+    const src = x.L.src !== 'xl' ? 'No project calculator yet: costs are standard estimates.' : x.def.listing ? `Prices and cash out follow the ${esc(x.def.file)}. Legal costs, maintenance, renovation and rent are estimates until the legal fees breakdown is reviewed.` : `Figures follow the ${esc(x.def.file)}.`;
+    return `<div class="bdgrid">
+      <table class="sheet">
+        <tr class="grand"><td>TOTAL CASH OUT <span class="small">(differential sum paid upon SPA signing)</span></td><td class="num">${rmP(x.received)}</td></tr>
+        <tr class="grand"><td>NETT CAPITAL UTILISATION <span class="small">(negative amount = extra cash)</span></td><td class="num">${rmP(x.ncu)}</td></tr>
+        <tr class="band"><td colspan="2">FIXED COST (cost to VP)</td></tr>
+        <tr class="sec"><td colspan="2">Pre-purchase cost</td></tr>
+        ${line('Booking fee', x.def.booking, x.def.refund ? '' : 'paid to developer, not refunded')}
+        ${x.pre.map(l => line(l[0], l[1], l[2])).join('')}
+        ${line('Pre-purchase total (estimation)', x.preTotal, '', 'tot')}
+        <tr class="sec"><td colspan="2">During construction cost</td></tr>
+        ${x.cons.map(l => line(l[0], l[1], l[2])).join('')}
+        ${line('During construction total (estimation)', x.consTotal, '', 'tot')}
+        ${line('TOTAL FIXED COST', x.fixed, '', 'grand')}
+        <tr class="band"><td colspan="2">CASH TO BE RECEIVED</td></tr>
+        ${line('Cash out (loan − nett price)', x.cashout, '', 'tot')}
+        ${line('Booking refund', x.refund)}
+        ${line('Cash to be received total', x.received, '', 'tot')}
+        ${line('NETT CAPITAL UTILISATION', x.ncu, '', 'grand')}
+      </table>
+      <div style="display:grid;gap:14px;align-content:start">
+        <table class="sheet">
+          <tr class="band var"><td colspan="2">VARIABLE COST <span class="small">(not required before VP)</span></td></tr>
+          ${x.var.map(l => line(l[0], l[1], l[2])).join('')}
+          ${line('TOTAL VARIABLE COST', x.varTotal, '', 'grand var')}
+        </table>
+        <table class="sheet">
+          <tr class="band"><td colspan="2">MONTHLY</td></tr>
+          ${line(`Rental income: ${x.rentOpt.label}`, x.rent, x.rentNote, 'tot')}
+          ${line(`Instalment: ${rm(x.S.instBasis === 'nett' ? x.nett : x.loan)} at ${x.rate}% over ${x.tenure} years${x.def.commercial ? ' (commercial max 25)' : x.type === 'lppsa' ? ' (LPPSA max 30)' : ''}`, x.inst)}
+          ${line(`Maintenance + sinking fund (${x.def.maintNote})`, x.maint)}
+          ${line('ESTIMATED CASHFLOW', x.cf, '', 'grand')}
+          ${line('Cashflow excluding principal (interest only)', x.cfIO, '', 'tot')}
+        </table>
+        <p class="small" style="margin:0">${src} Loan = ${x.fromSheet ? 'deal price + deal-sheet cash out' : `${Math.round(x.ltv*100)}% × ${rm(x.base)}${x.def.valPsf ? ` (SPA capped at valuation RM${x.def.valPsf} psf)` : x.type === 'lppsa' ? ' (LPPSA cap RM750k)' : ''}`}.</p>
+      </div>
+    </div>`;
+  }
+
+  // A 70% loan on a client who still has 90% quota left is an ELIGIBILITY limit, not a quota limit.
+  // Returns the 90% loan that would have been needed, so the card can say why.
+  function marginCut(x, S, items){
+    if (x.type !== 'b70' || !S.my) return null;
+    const used90 = (items || []).filter(i => i.type === 'b90').length;
+    if (S.slots90 - used90 <= 0) return null;
+    const at90 = compute(x.L, 'b90', S);
+    return {loan90: at90.loan, over: at90.loan - S.bankElig};
+  }
+
+  // One property card: unit and rent pickers, key numbers, full cost breakdown.
+  // Used by the plan buying sequence and by the project breakdown under "Every project".
+  function propArticle(x, S, all, stepHTML, openBd, cut){
+    const siblings = all.filter(L => L.pid === x.pid && !blockReason(L, S)).sort((m, n) => unitLabel(m).localeCompare(unitLabel(n), 'en', {numeric: true}));
+    const unitOpts = siblings.map(L => { const pr = priceOf(L, S); return `<option value="${esc(L.id)}"${L.id === x.L.id ? ' selected' : ''}>${esc(unitLabel(L))} · nett ${rmK(pr.nett)}</option>`; }).join('');
+    const rentOpts = x.def.rents.map(o => `<option value="${o.id}"${o.id === x.rentOpt.id ? ' selected' : ''}>${esc(o.label)}</option>`).join('');
+    const hl = x.L.src === 'xl' ? x.def.highlights : (x.p.highlights || []);
+    return `<article class="prop">
+          <div class="prophead">
+            ${stepHTML}
+            <div class="who">
+              <h3>${x.stage ? `<span class="pill stg">Stage ${x.stage}</span> ` : ''}${esc(x.name)} ${statusPill(statusOf(x.L))} <span class="fin ${x.type === 'lppsa' ? 'lppsa' : ''}">${finLabel(x.type)}</span> ${cut ? `<span class="pill cut">Margin cut by eligibility</span> ` : ''}<span class="pill src">${x.L.src !== 'xl' ? 'Deal sheet' : x.def.listing ? 'Price list · costs estimated' : 'Excel calculator'}</span></h3>
+              <div class="small">${esc([locationOf(x.L), unitLabel(x.L)].filter(Boolean).join(' · '))}</div>
+            </div>
+          </div>
+          <div class="pickers">
+            <label class="field" style="margin:0"><span class="flabel">Unit</span><select data-lock="${esc(x.pid)}" aria-label="Unit for ${esc(x.name)}">${unitOpts}</select></label>
+            <label class="field" style="margin:0"><span class="flabel">Rental strategy</span><select data-rent="${esc(x.pid)}" aria-label="Rental strategy for ${esc(x.name)}">${rentOpts}</select></label>
+          </div>
+          <div class="kv">
+            <div><div class="k">SPA price</div><div class="v">${rm(x.spa)}</div></div>
+            <div><div class="k">Nett price</div><div class="v">${rm(x.nett)}</div></div>
+            <div><div class="k">Loan</div><div class="v">${rm(x.loan)}<small>${x.fromSheet ? 'per deal sheet' : x.type === 'lppsa' ? 'LPPSA 100%' : Math.round(x.ltv*100) + '% of ' + (x.base < x.spa ? 'valuation ' + rmK(x.base) : 'SPA')}${cut ? `<br>90% would need ${rmK(cut.loan90)}, above eligibility` : ''}</small></div></div>
+            <div><div class="k">Cash out</div><div class="v ${signCls(x.cashout)}">${x.cashout < 0 ? 'No cash back' : rm(x.cashout, true)}<small>${coBand(x.cashout)}</small></div></div>
+            <div><div class="k">Nett capital util.</div><div class="v">${rmP(x.ncu)}</div></div>
+            <div><div class="k">Variable cost</div><div class="v">${rm(x.varTotal)}</div></div>
+            <div><div class="k">Instalment</div><div class="v">${rm(x.inst)}</div></div>
+            <div><div class="k">Cashflow</div><div class="v ${signCls(x.cf)}">${rm(x.cf, true)}<small>${cfBand(x.cf)} · ${esc(x.rentOpt.label)} ${rm(x.rent)}</small></div></div>
+          </div>
+          <details class="bd"${openBd ? ' open' : ''}><summary>Full cost breakdown</summary>${breakdownHTML(x)}</details>
+          ${hl.length ? `<details class="why"><summary>Why ${esc(x.name)}</summary><ul>${hl.map(h => `<li>${esc(h)}</li>`).join('')}</ul></details>` : ''}
+        </article>`;
+  }
+
+  // Loan balance left after n years of instalments
+  const balAfter = (loan, rate, tenureYears, years) => {
+    const i = rate / 1200, N = Math.round(tenureYears * 12), k = Math.min(Math.round(years * 12), N);
+    if (!i) return loan * (1 - k / N);
+    const f = Math.pow(1 + i, N), g = Math.pow(1 + i, k);
+    return loan * (f - g) / (f - 1);
+  };
+
+  // Profit and loss at a glance: what goes in, what comes back, what it is worth after the holding period
+  function outcome(items, S){
+    const n = S.horizon, g = S.growth / 100;
+    let value = 0, debt = 0, spa = 0;
+    for (const x of items) {
+      spa += x.spa;
+      value += x.spa * Math.pow(1 + g, n);
+      debt += balAfter(x.loan, x.rate, x.tenure, n);
+    }
+    const p = makePlan(items);
+    const capital = p.ncu + p.varTotal;          // cash the client puts in, after the cash out comes back
+    const cumCf = p.cf * 12 * n;
+    const equity = value - debt;
+    return {n, spa, value, debt, equity, cumCf, capital, wealth: equity + cumCf, gain: equity + cumCf - Math.max(0, capital)};
+  }
+
+  function execSummary(items, S){
+    const p = makePlan(items), o = outcome(items, S);
+    const tile = (lab, val, sub, cls) => `<div><span class="eyebrow">${lab}</span><b class="num ${cls || ''}">${val}</b><span>${sub}</span></div>`;
+    return `<div class="exec">
+      ${tile(o.capital > 0 ? 'Capital required' : 'Cash left in hand', o.capital > 0 ? rm(o.capital) : rm(-o.capital), o.capital > 0 ? 'Cash the client puts in, after the cash out' : 'After every cost is paid from the cash out', o.capital > 0 ? '' : 'pos')}
+      ${tile('Loan amount', rm(p.bankLoan + p.lppsaLoan), `${items.length} ${items.length === 1 ? 'property' : 'properties'} · ${rmK(p.value)} SPA value`)}
+      ${tile('Monthly instalment', rm(p.inst), 'All loans together')}
+      ${tile('Monthly rental', rm(p.rent), 'At the chosen rental strategy')}
+      ${tile('Net monthly cashflow', rm(p.cf, true), cfBand(p.cf), signCls(p.cf))}
+      ${tile(`Wealth in ${o.n} years`, rmK(o.wealth), `Equity ${rmK(o.equity)}${o.cumCf >= 0 ? ' + ' : ' − '}cashflow ${rmK(Math.abs(o.cumCf))}`, o.wealth >= 0 ? 'pos' : 'neg')}
+    </div>
+    <p class="small" style="margin:8px 0 0">Wealth assumes ${S.growth}% price growth a year, rent unchanged, and the loans paid down on schedule. Property value ${rmK(o.value)} less loans left ${rmK(o.debt)}${o.capital > 0 ? `, against ${rm(o.capital)} put in: a net gain of ${rmK(o.gain)}` : ', with nothing of the client\'s own money left in'}.</p>`;
+  }
+
+  function renderDetail(S){
+    const el = $('detail');
+    const c = lastPicked && lastPicked.chosen.find(c => c.kind === selectedKind);
+    if (!c) { el.innerHTML = ''; return; }
+    const p = c.plan;
+    const order = {b90: 0, lppsa: 1, b70: 2};
+    const items = p.roadmap ? p.items.slice() : p.items.slice().sort((a, b) => order[a.type] - order[b.type] || b.loan - a.loan);
+    const all = listings();
+    const after = S.cashAvail - p.ncu - p.varTotal;
+
+    const notes = [];
+    if (S.debt > 0) notes.push(`Debts to clear: ${rm(S.debt)} (personal loan ${rm(S.debtPL)}, credit card ${rm(S.debtCC)}, car loan ${rm(S.debtCar)}). Cash after fixed costs ${rm(-p.ncu)} ${-p.ncu >= S.debt ? 'covers it' : 'does not cover it yet'}.`);
+    if (S.debt > 0 && p.roadmap) notes.push(p.roadmap.debtCovered ? `Property 1 is chosen because its cash back of ${rm(items[0].cashout)} covers the bad debt.` : 'No single property covers the bad debt: property 1 gives the most cash back available.');
+    { const o = outlook(items); if (o.n >= 4) notes.push(`20-year Sell 1, Free 3 outlook (value and rent double, loans about half paid): sell ${o.sold} of ${o.n} units, keep ${o.kept} ${o.paidOff ? 'fully paid' : 'mostly paid'}, about ${rm(o.passive)}/month passive income and ${rmK(o.value)} portfolio value.`); }
+    if (items.some(x => x.def.commercial)) notes.push('Laatinn is a commercial property: it sits outside the residential loan quota, so it keeps up to 85% margin however many residential housing loans the client has. Commercial loans run for 25 years at most.');
+    const cutItems = items.map(x => ({x, cut: marginCut(x, S, items)})).filter(o => o.cut);
+    if (cutItems.length) notes.push(`${cutItems.map(o => esc(o.x.name)).join(' and ')} ${cutItems.length > 1 ? 'are' : 'is'} taken at 70%, but this client still qualifies for 90% on the 1st and 2nd property. The margin is reduced because the 90% loan (${cutItems.map(o => rmK(o.cut.loan90)).join(', ')}) is above the ${rmK(S.bankElig)} loan eligibility: an income and eligibility limit, not the property-count rule. Raise income or eligibility and the same unit goes back to 90%.`);
+    if (items.some(x => x.type === 'b70') && S.my && cutItems.length < items.filter(x => x.type === 'b70').length) notes.push('Margin of finance follows the residential property count: 1st and 2nd property 90%, 3rd onwards 70%. Buy the 90% units first.');
+    if (items.some(x => x.type === 'lppsa')) notes.push('LPPSA covers one under-construction property (up to RM750k) and is separate from the bank loan quota, so it is bought at the same time as the bank purchase. LPPSA loans run for 30 years at most, so the instalment is higher than a 35-year bank loan on the same amount.');
+    if (S.dualBuy && !items.some(x => x.type === 'lppsa')) notes.push('No under-construction unit fits the LPPSA eligibility, so this plan uses bank financing only. LPPSA is only recommended on under-construction properties.');
+    if (items.some(x => x.fromSheet)) notes.push('Deal-sheet projects: loan = deal price + cash out on the sheet, subject to bank valuation.');
+    if (items.some(x => x.L.src === 'sheet')) notes.push('Deal-sheet projects use estimated legal, renovation and maintenance costs (set under More assumptions).');
+    if (items.some(x => x.def.listing)) notes.push('Price-list projects: rent, legal costs, maintenance and renovation are estimates until the legal fees breakdown and rental data are in (set under More assumptions).');
+    if (!S.inclVar && after < 0) notes.push(`Variable costs of ${rm(p.varTotal)} fall due after VP. Set aside part of the cash out: the client is ${rm(-after)} short after all costs.`);
+    if (S.instBasis === 'nett') notes.push('Cashflow uses instalment on the nett price, as on deal sheets. The real instalment on the full loan is higher.');
+
+    el.innerHTML = `<div class="sectionhead"><div><span class="eyebrow">${c.recommended ? 'Recommended plan' : 'Selected plan'}</span><h2>${c.title}: buying sequence</h2></div>
+        <div class="actions"><button class="btn primary" type="button" id="onePagerBtn">Client one-pager</button><button class="btn" type="button" id="copyBtn">Copy summary</button><button class="btn" type="button" id="printBtn">Print</button></div></div>
+      <span class="eyebrow" style="display:block;margin-top:16px">Executive summary</span>
+      ${execSummary(items, S)}
+      <span class="eyebrow" style="display:block;margin-top:18px">Where the money goes</span>
+      <div class="map" style="margin-top:6px">
+        <div class="hl"><span class="eyebrow">Total cash out</span><b class="num">${rmP(p.received)}</b><span>Incl. booking refunds</span></div>
+        <div><span class="eyebrow">Fixed cost to VP</span><b class="num">${rmP(p.fixed)}</b><span>Booking, legal, interest</span></div>
+        <div class="hl"><span class="eyebrow">Nett capital utilisation</span><b class="num">${rmP(p.ncu)}</b><span>Negative = extra cash</span></div>
+        <div><span class="eyebrow">Variable cost after VP</span><b class="num">${rmP(p.varTotal)}</b><span>POT, POC, renovation, deposits</span></div>
+        <div><span class="eyebrow">Cash position after all</span><b class="num ${signCls(after)}">${rm(after, true)}</b><span>From ${rmK(S.cashAvail)} on hand</span></div>
+        <div><span class="eyebrow">Monthly cashflow</span><b class="num ${signCls(p.cf)}">${rm(p.cf, true)}</b><span>${rm(p.cfIO, true)} excl. principal</span></div>
+      </div>
+      <div class="props">${items.map((x, i) => propArticle(x, S, all, `<span class="step">${i+1}</span>`, i === 0, marginCut(x, S, items))).join('')}</div>
+      <ul class="notes">${notes.map(n => `<li>${n}</li>`).join('')}</ul>
+      <div id="copyArea"></div>`;
+    $('copyBtn').onclick = () => copySummary(S, c, items, after);
+    $('onePagerBtn').onclick = () => openOnePager(S, c, items);
+    $('printBtn').onclick = () => { document.querySelectorAll('details.bd').forEach(d => d.open = true); try { window.print(); } catch (e) {} };
+  }
+
+  // Client one-pager: the plan as a page the client keeps. Print or save as PDF, then close.
+  function openOnePager(S, c, items){
+    const el = $('onePager'), p = c.plan, o = outcome(items, S);
+    const stages = [...new Set(items.map(x => x.stage).filter(Boolean))];
+    const today = new Date().toLocaleDateString('en-MY', {day: 'numeric', month: 'long', year: 'numeric'});
+    const tile = (lab, val, sub, cls) => `<div class="op-tile"><span class="op-lab">${lab}</span><b class="num ${cls || ''}">${val}</b><span class="op-sub">${sub}</span></div>`;
+    el.innerHTML = `<div class="op-bar">
+        <span>Client one-pager</span>
+        <div class="actions"><button class="btn primary" type="button" id="opPrint">Print or save as PDF</button><button class="btn" type="button" id="opClose">Close</button></div>
+      </div>
+      <article class="op-page">
+        <header class="op-head">
+          <div><b>FAR Capital</b><span>Property plan${S.clientName ? ' for ' + esc(S.clientName) : ''}</span></div>
+          <span class="op-date">${today}</span>
+        </header>
+
+        <h1>${items.length === 1 ? 'One property' : items.length + ' properties'} that fit what you can borrow today.</h1>
+        <p class="op-lead">${S.cashGoal > 0 ? `You need ${rm(S.cashGoal)} in hand${S.debt > 0 ? ', starting with your debts' : ''}. ` : ''}This plan uses a bank eligibility of ${rmK(S.bankElig)}${S.gov && S.lppsaElig > 0 ? ` and LPPSA of ${rmK(S.lppsaElig)}` : ''} and ${rmK(S.cashAvail)} of savings.</p>
+
+        <div class="op-tiles">
+          ${tile(o.capital > 0 ? 'Cash you put in' : 'Cash you keep', o.capital > 0 ? rm(o.capital) : rm(-o.capital), o.capital > 0 ? 'After the cash back' : 'After every cost is paid', o.capital > 0 ? '' : 'pos')}
+          ${tile('Cash back to you', rm(p.received), 'Released on signing')}
+          ${tile('Monthly cost', rm(p.inst), `Rent covers ${rm(p.rent)}`)}
+          ${tile('Cashflow', rm(p.cf, true), 'Rent less loan and upkeep', signCls(p.cf))}
+          ${tile(`Value in ${o.n} years`, rmK(o.value), `Loans left ${rmK(o.debt)}`)}
+          ${tile(`Your equity in ${o.n} years`, rmK(o.wealth), `From ${rmK(p.value)} bought today`, 'pos')}
+        </div>
+
+        <h2>What you buy, and in what order</h2>
+        <ol class="op-props">${items.map((x, i) => {
+          const cut = marginCut(x, S, items);
+          return `<li>
+            <div class="op-prop-head">
+              <span class="op-step">${i + 1}</span>
+              <div><b>${esc(x.name)}</b><span class="op-sub">${esc([locationOf(x.L), unitLabel(x.L)].filter(Boolean).join(' · '))}</span></div>
+              <span class="op-fin">${finLabel(x.type)}</span>
+            </div>
+            <dl class="op-facts">
+              <div><dt>Price</dt><dd>${rm(x.spa)}</dd></div>
+              <div><dt>You pay</dt><dd>${rm(x.nett)}</dd></div>
+              <div><dt>Loan</dt><dd>${rm(x.loan)}</dd></div>
+              <div><dt>Cash back</dt><dd class="${signCls(x.cashout)}">${x.cashout < 0 ? 'None' : rm(x.cashout)}</dd></div>
+              <div><dt>Instalment</dt><dd>${rm(x.inst)}</dd></div>
+              <div><dt>Rent</dt><dd>${rm(x.rent)}</dd></div>
+              <div><dt>Cashflow</dt><dd class="${signCls(x.cf)}">${rm(x.cf, true)}</dd></div>
+              <div><dt>Handover</dt><dd>${esc(statusOf(x.L) || 'Completed')}</dd></div>
+            </dl>
+            ${cut ? `<p class="op-note">You still qualify for a 90% loan. This one is at 70% because a 90% loan of ${rmK(cut.loan90)} is above your eligibility.</p>` : ''}
+          </li>`;
+        }).join('')}</ol>
+
+        <h2>Where this takes you</h2>
+        <div class="op-stages">${[1, 2, 3].map(n => {
+          const mine = items.filter(x => x.stage === n);
+          const info = STAGE_INFO[n];
+          return `<div class="op-stage${mine.length ? ' on' : ''}">
+            <b>${esc(info.title.replace(/^Stage \d · /, ''))}</b>
+            <span class="op-sub">${esc(info.planTag)}</span>
+            <span class="op-stage-items">${mine.length ? mine.map(x => esc(x.name)).join(', ') : 'Later, as your eligibility grows'}</span>
+          </div>`;
+        }).join('')}</div>
+
+        <h2>Before you sign</h2>
+        <ul class="op-notes">
+          <li>Booking fee and legal costs of ${rm(p.fixed)} are paid up front. The cash back of ${rm(p.received)} comes after the loan is released.</li>
+          <li>After handover you also pay ${rm(p.varTotal)} for MOT, perfection of transfer and charge, renovation and deposits.</li>
+          <li>Rent is ${items.some(x => x.def.listing) ? 'estimated for projects without a rental programme, and ' : ''}not guaranteed. Instalments assume ${S.rate}% a year over ${S.tenure} years${items.some(x => x.type === 'lppsa') ? ', and LPPSA over 30 years' : ''}.</li>
+          <li>Loan approval depends on the bank's own assessment of your income, commitments and the property valuation.</li>
+        </ul>
+
+        <footer class="op-foot">Prepared by FAR Capital. Figures come from the developer price lists and project calculators dated 18 September 2026, and change when prices, rates or your eligibility change.</footer>
+      </article>`;
+    el.hidden = false;
+    document.body.style.overflow = 'hidden';
+    $('opPrint').onclick = () => { try { window.print(); } catch (e) {} };
+    $('opClose').onclick = closeOnePager;
+    $('opClose').focus();
+  }
+  function closeOnePager(){ $('onePager').hidden = true; document.body.style.overflow = ''; }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('onePager').hidden) closeOnePager(); });
+
+  function copySummary(S, c, items, after){
+    const p = c.plan;
+    const lines = [
+      `Property plan: ${c.title}`,
+      `Age ${S.age} · ${S.tenure}-year loans · Bank eligibility ${rm(S.bankElig)}${S.gov ? ' · LPPSA ' + rm(S.lppsaElig) : ''}`,
+      '',
+      ...items.map((x, i) => `${i+1}. ${x.name} ${x.L.src === 'xl' ? x.u.l : ''}${locationOf(x.L) ? ' (' + locationOf(x.L) + ')' : ''}\n   ${finLabel(x.type)} · SPA ${rm(x.spa)} · nett ${rm(x.nett)} · loan ${rm(x.loan)}\n   Cash out ${rm(x.cashout, true)} · nett capital utilisation ${rmP(x.ncu)} · variable cost ${rm(x.varTotal)}\n   ${x.rentOpt.label} ${rm(x.rent)} − instalment ${rm(x.inst)} − maintenance ${rm(x.maint)} = cashflow ${rm(x.cf, true)}/month`),
+      '',
+      `Total cash out: ${rmP(p.received)}`,
+      `Total fixed cost to VP: ${rmP(p.fixed)}`,
+      `Nett capital utilisation: ${rmP(p.ncu)} (negative = extra cash)`,
+      `Variable cost after VP: ${rmP(p.varTotal)}`,
+      `Monthly cashflow: ${rm(p.cf, true)} (${rm(p.cfIO, true)} excluding principal)`,
+      '',
+      'Illustration only. Subject to bank approval, valuation and developer terms.'
+    ];
+    const text = lines.join('\n');
+    const area = $('copyArea');
+    const fallback = () => { area.innerHTML = `<textarea id="copyFallback" readonly aria-label="Plan summary"></textarea>`; const t = $('copyFallback'); t.value = text; t.focus(); t.select(); };
+    try { navigator.clipboard.writeText(text).then(() => { area.innerHTML = '<p class="copied">Copied. Paste it into WhatsApp or email.</p>'; }, fallback); }
+    catch (e) { fallback(); }
+  }
+
+  function renderScore(S){
+    const groups = new Map();
+    for (const L of listings()) { if (!groups.has(L.pid)) groups.set(L.pid, []); groups.get(L.pid).push(L); }
+    const rows = [];
+    for (const [pid, ls] of groups) {
+      const ok = ls.filter(L => !blockReason(L, S));
+      const pool = ok.length ? ok : ls;
+      const locked = locks[pid] && pool.find(L => L.id === locks[pid]);
+      const types = S.my ? ['b90', 'b70'] : ['b70'];
+      if (S.gov && pool.some(lppsaUnit)) types.unshift('lppsa');
+      types.forEach(t => {
+        const lim = (t === 'lppsa' ? S.lppsaElig : S.bankElig) + 1;
+        const src = t === 'lppsa' ? pool.filter(lppsaUnit) : pool;
+        const xs = (locked && src.includes(locked) ? [locked] : src).map(L => compute(L, t, S));
+        const fit = xs.filter(x => x.loan <= lim);
+        const x = fit.length ? fit.reduce((a, b) => -b.ncu > -a.ncu ? b : a) : xs.reduce((a, b) => b.loan < a.loan ? b : a);
+        let blocked = !ok.length ? blockReason(ls[0], S) : fit.length ? '' : 'loan above eligibility';
+        if (!blocked && t === 'b70' && S.my && S.slots90 > 0) blocked = '90% loan above eligibility, so 70% is shown';
+        rows.push({x, blocked, units: ls.length, key: pid + '|' + t});
+      });
+    }
+    rows.sort((a, b) => (!!a.blocked - !!b.blocked) || b.x.cf - a.x.cf);
+    $('scoreTable').innerHTML = `<thead><tr><th>Project · unit</th><th class="l">Financing</th><th>Loan</th><th>Cash out</th><th>Nett capital util.</th><th>Variable cost</th><th>Instalment</th><th>Rent</th><th>Cashflow</th></tr></thead>
+      <tbody>${rows.map(({x, blocked, units, key}) => `<tr class="prow${key === openProj ? ' on' : ''}" data-proj="${esc(key)}" tabindex="0" role="button" aria-expanded="${key === openProj}" style="${blocked && !/so 70% is shown/.test(blocked) ? 'opacity:.45' : ''}">
+        <td><b>${esc(x.name)}</b> <span class="sub">${esc(unitLabel(x.L))}${x.L.src === 'xl' ? ` · ${units} units` : ''}${blocked ? ' · ' + blocked : ''}</span></td>
+        <td class="l"><span class="fin ${x.type === 'lppsa' ? 'lppsa' : ''}">${finLabel(x.type)}</span></td>
+        <td>${rm(x.loan)}</td><td class="${signCls(x.cashout)}">${rm(x.cashout, true)}</td><td>${rmP(x.ncu)}</td><td>${rm(x.varTotal)}</td>
+        <td>${rm(x.inst)}</td><td>${rm(x.rent)}<span class="sub">${esc(x.rentOpt.label)}</span></td><td class="${signCls(x.cf)}"><b>${rm(x.cf, true)}</b></td>
+      </tr>`).join('')}</tbody>`;
+    renderProjDetail(S, rows);
+  }
+
+  // Breakdown of one project from the table above, in the same layout as the selected plan's properties
+  function renderProjDetail(S, rows){
+    const el = $('projDetail');
+    const row = rows.find(r => r.key === openProj);
+    if (!row) { el.innerHTML = ''; return; }
+    const x = row.x, all = listings();
+    el.innerHTML = `<div class="sectionhead" style="margin-top:18px">
+        <div><span class="eyebrow">Project breakdown</span><h2>${esc(x.name)} at ${esc(finLabel(x.type))}</h2>
+        <p>${row.blocked ? (/so 70% is shown/.test(row.blocked) ? 'This client qualifies for 90%, but the 90% loan on this project is above their loan eligibility, so the numbers below are at 70%.' : 'Not available for this client: ' + esc(row.blocked) + '.') : 'Same numbers as a plan property. Change the unit or rental strategy to compare.'}</p></div>
+        <button class="btn small" type="button" id="closeProj">Close</button>
+      </div>
+      ${execSummary([x], S)}
+      <div class="props">${propArticle(x, S, all, '', true, marginCut(x, S, []))}</div>`;
+    $('closeProj').onclick = () => { openProj = null; update(); };
+  }
+
+  const LIB_COLS = [
+    ['project', 'Project', 'text'], ['location', 'Location', 'text'], ['variant', 'Unit / type', 'text'],
+    ['val', 'Market / valuation', 'number'], ['spa', 'SPA price', 'number'], ['nett', 'Deal (nett) price', 'number'], ['rent', 'Rent / month', 'number'],
+    ['co90', 'Cash out LTV90', 'number'], ['co70', 'Cash out LTV70', 'number'], ['coLppsa', 'Cash out LPPSA', 'number'],
+    ['minSalary', 'Min. salary', 'number'], ['status', 'Status', 'select'], ['lppsa', 'LPPSA', 'check']
+  ];
+  const OPTIONAL = new Set(['co90', 'co70', 'coLppsa']);
+  function renderLibrary(){
+    $('libTable').innerHTML = `<thead><tr>${LIB_COLS.map(c => `<th class="l">${c[1]}</th>`).join('')}<th></th></tr></thead>
+      <tbody>${library.map((p, i) => `<tr>${LIB_COLS.map(([k, , t]) => {
+        const id = `lib-${i}-${k}`;
+        if (t === 'select') return `<td class="l"><select id="${id}" data-i="${i}" data-k="${k}" aria-label="Status"><option${/under|uc/i.test(p.status) ? '' : ' selected'}>Completed</option><option${/under|uc/i.test(p.status) ? ' selected' : ''}>Under construction</option></select></td>`;
+        if (t === 'check') return `<td class="l"><input type="checkbox" id="${id}" data-i="${i}" data-k="${k}" aria-label="LPPSA eligible"${p.lppsa ? ' checked' : ''}></td>`;
+        return `<td class="l"><input type="${t}" id="${id}" data-i="${i}" data-k="${k}" value="${esc(p[k] ?? '')}" aria-label="${k}"${OPTIONAL.has(k) ? ' placeholder="auto"' : ''}></td>`;
+      }).join('')}<td><button class="btn small" type="button" data-del="${i}">Remove</button></td></tr>`).join('')}</tbody>`;
+  }
+  $('libTable').addEventListener('input', e => {
+    const t = e.target; if (!t.dataset.k) return;
+    const p = library[+t.dataset.i], k = t.dataset.k;
+    p[k] = t.type === 'checkbox' ? t.checked : t.type === 'number' ? (OPTIONAL.has(k) && t.value === '' ? null : (parseFloat(t.value) || 0)) : t.value;
+    if (k === 'val' && !(+p.spa > 0)) p.spa = p.val;
+    saveLib(); update();
+  });
+  $('libTable').addEventListener('click', e => { const d = e.target.dataset.del; if (d === undefined) return; library.splice(+d, 1); saveLib(); renderLibrary(); update(); });
+  $('addRow').onclick = () => { library.push({id: 'p' + Date.now(), project: 'New project', variant: '', location: '', status: 'Completed', spa: 600000, val: 600000, nett: 540000, rent: 2500, co90: null, co70: null, coLppsa: null, minSalary: 0, tags: [], highlights: [], lppsa: false}); saveLib(); renderLibrary(); update(); };
+  $('resetLib').onclick = () => { library = DEFAULT_LIB.map(o => ({...o})); saveLib(); renderLibrary(); update(); };
+
+  $('plans').addEventListener('click', e => {
+    const b = e.target.closest('.plan'); if (!b) return;
+    selectedKind = b.dataset.kind;
+    document.querySelectorAll('.plan').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.kind === selectedKind)));
+    renderDetail(readState());
+  });
+  $('scoreTable').addEventListener('click', e => {
+    const tr = e.target.closest('tr[data-proj]');
+    if (!tr) return;
+    openProj = openProj === tr.dataset.proj ? null : tr.dataset.proj;
+    update();
+    if (openProj) $('projDetail').scrollIntoView({behavior: 'smooth', block: 'nearest'});
+  });
+  $('scoreTable').addEventListener('keydown', e => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const tr = e.target.closest('tr[data-proj]');
+    if (!tr) return;
+    e.preventDefault();
+    openProj = openProj === tr.dataset.proj ? null : tr.dataset.proj;
+    update();
+  });
+  $('goalChips').addEventListener('click', e => {
+    const b = e.target.closest('button[data-amt]');
+    if (!b) return;
+    $('goalCash').value = String(num('goalCash') + +b.dataset.amt);
+    update();
+  });
+  $('projDetail').addEventListener('change', e => {
+    const t = e.target;
+    if (t.dataset.lock) { locks[t.dataset.lock] = t.value; update(); }
+    else if (t.dataset.rent) { rentPicks[t.dataset.rent] = t.value; update(); }
+  });
+  $('detail').addEventListener('change', e => {
+    const t = e.target;
+    if (t.dataset.lock) { locks[t.dataset.lock] = t.value; update(); }
+    else if (t.dataset.rent) { rentPicks[t.dataset.rent] = t.value; update(); }
+  });
+  $('resetPicks').onclick = () => { for (const k in locks) delete locks[k]; for (const k in rentPicks) delete rentPicks[k]; update(); };
+
+  function syncVisibility(S){
+    $('ageOut').textContent = S.age;
+    $('empField').hidden = !S.my;
+    $('bumiField').hidden = !S.my;
+    $('lppsaField').hidden = !S.gov;
+    $('directField').hidden = S.mode !== 'direct';
+    $('incomeFields').hidden = S.mode !== 'income';
+    $('incomeHint').textContent = S.mode === 'income' ? `≈ ${rm(S.bankElig)} bank eligibility at ${S.dsr}% DSR over ${S.tenure} years.` : '';
+    $('sellFields').hidden = !S.sellOn;
+    const chips = [['debt', 'Clear bad debts', S.debt], ['ef', 'Emergency fund', S.efGap], ['biz', 'Start or fund a business', 50000]].filter(c => c[2] > 0);
+    $('goalChips').innerHTML = chips.map(([k, lab, amt]) => `<button type="button" class="chip add" data-amt="${amt}">+ ${esc(lab)} ${rmK(amt)}</button>`).join('');
+  }
+
+  function update(){
+    const S = readState();
+    syncVisibility(S);
+    renderStages(S);
+    renderFacts(S);
+    renderTarget(S);
+    renderSell(S);
+    const res = search(S);
+    const picked = pickPlans(res, S);
+    renderPlans(S, picked, res);
+    renderStageCard(S, picked.chosen[0] && picked.chosen[0].plan.roadmap ? picked.chosen[0].plan : null);
+    renderDetail(S);
+    renderScore(S);
+  }
+
+  // Print is a first-class view: every breakdown opens, then goes back to how the consultant had it
+  let printOpened = [];
+  window.addEventListener('beforeprint', () => {
+    printOpened = [...document.querySelectorAll('main details:not([open])')];
+    printOpened.forEach(d => d.open = true);
+  });
+  window.addEventListener('afterprint', () => { printOpened.forEach(d => d.open = false); printOpened = []; });
+
+  let pending = 0;
+  const schedule = () => { cancelAnimationFrame(pending); pending = requestAnimationFrame(update); };
+  $('form').addEventListener('input', schedule);
+  $('form').addEventListener('change', schedule);
+  window.addEventListener('beforeprint', () => document.querySelectorAll('details.bd').forEach(d => d.open = true));
+  renderLibrary();
+  update();
+})();
+</script>
